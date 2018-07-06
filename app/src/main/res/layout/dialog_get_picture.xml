@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/flt_amble_upload"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginTop="1dp"
+        android:background="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:drawablePadding="13dp"
+            android:gravity="center"
+            android:text="相册"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+    </FrameLayout>
+    <View
+        android:background="@color/gray_"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <FrameLayout
+        android:id="@+id/flt_take_photo_upload"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginTop="2px"
+        android:background="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:drawablePadding="13dp"
+            android:gravity="center"
+            android:text="相机"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+    </FrameLayout>
+    <View
+        android:background="@color/gray_"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <Button
+
+        android:id="@+id/btn_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginTop="2px"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center"
+        android:text="取消"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+</LinearLayout>

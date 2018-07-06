@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- 相对于自身旋转90度 -->
+    <rotate 
+        android:duration="400"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:fromDegrees="0"
+        android:toDegrees="+45"
+        android:fillAfter="true"
+        android:interpolator="@android:anim/linear_interpolator"
+        />
+
+</set>

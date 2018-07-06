@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@android:color/transparent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:gravity="center"
+        android:orientation="vertical"
+        android:background="@mipmap/pet_bone_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:drawablePadding="6dp"
+            android:drawableStart="@mipmap/pet_food"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:text="狗粮 x3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:layout_marginTop="8dp"
+            android:drawablePadding="6dp"
+            android:drawableStart="@mipmap/pet_ticket"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:text="粮票 x2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

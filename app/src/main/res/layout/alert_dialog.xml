@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/main_color_press">
+
+        <ImageView
+            android:id="@+id/iv_finish"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:scaleType="center"
+            android:src="@mipmap/back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="设置"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="@color/gray_answer" />
+
+            <TextView
+                android:id="@+id/tv_my_data"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="个人资料"
+                android:textColor="#232323"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="18dp"
+                android:background="@color/gray_answer" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="账号安全"
+                android:textColor="#232323"
+                android:textSize="16sp"  />
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="@color/gray_answer" />
+
+            <TextView
+                android:paddingEnd="10dp"
+                android:drawableEnd="@mipmap/small_back"
+                android:id="@+id/tv_pet_manage"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="宠物管理"
+                android:textColor="#232323"
+                android:textSize="16sp"  />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/gray_answer" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="消息提醒"
+                android:textColor="#232323"
+                android:textSize="16sp"  />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="18dp"
+                android:background="@color/gray_answer" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="黑名单"
+                android:textColor="#232323"
+                android:textSize="16sp"  />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="@color/gray_answer" />
+
+            <TextView
+                android:id="@+id/tv_suggest"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="反馈建议"
+                android:textColor="#232323"
+                android:textSize="16sp"  />
+
+            <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="18dp"
+            android:background="@color/gray_answer" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="当前版本"
+                android:textColor="#232323"
+                android:textSize="16sp"  />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="18dp"
+                android:background="@color/gray_answer" />
+
+            <TextView
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="清除缓存"
+                android:textColor="#232323"
+                android:textSize="16sp"  />
+
+            <View
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="18dp"
+                android:background="@color/gray_answer" />
+
+            <TextView
+                android:paddingEnd="10dp"
+                android:drawableEnd="@mipmap/small_back"
+                android:id="@+id/tv_about_our"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="left|center"
+                android:paddingStart="18dp"
+                android:text="关于我们"
+                android:textColor="#232323"
+                android:textSize="16sp" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="@color/gray_answer" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center"
+                android:text="退出登陆"
+                android:textColor="@color/main_color_press"
+                android:textSize="18sp"  />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

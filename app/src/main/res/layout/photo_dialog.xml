@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:background="@color/transparent"
+    android:gravity="center">
+
+    <LinearLayout
+        android:id="@+id/ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_take_photo"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:background="@drawable/take_photo_selector" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+
+        <Button
+            android:id="@+id/btn_pic"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:background="@drawable/pic_selector" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:scaleType="fitXY"
+        android:layout_marginTop="10dp"
+        android:id="@+id/iv_cancle"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_below="@+id/ll"
+        android:layout_centerInParent="true" />
+</RelativeLayout>

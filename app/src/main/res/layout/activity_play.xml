@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:background="@color/gray"
+    android:fitsSystemWindows="true">
+
+    <com.pet.view.PageRecyclerView
+        android:layout_centerInParent="true"
+        android:id="@+id/cusom_swipe_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+    <com.pet.view.PageIndicatorView
+        android:id="@+id/indicator"
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp" />
+
+</RelativeLayout>
