@@ -13,6 +13,12 @@ public class RegionItem implements ClusterItem {
     private String userType;
     private String url;
 
+    private String userId;
+
+    public String getUserId(){
+        return userId;
+    }
+
     public String getUserType() {
         return userType;
     }
@@ -20,10 +26,11 @@ public class RegionItem implements ClusterItem {
         return url;
     }
 
-    public RegionItem(LatLng latLng, String userType,String url) {
+    public RegionItem(LatLng latLng, String userType,String url,String userId) {
         this.mLatLng=latLng;
         this.userType = userType;
         this.url = url;
+        this.userId = userId;
     }
 
     @Override

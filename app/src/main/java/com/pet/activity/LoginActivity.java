@@ -87,9 +87,7 @@ public class LoginActivity extends BaseActivity {
         initData();
 
         mEtUserName.setText("17671714521");
-        mEtPassWord.setText("12345678");
-
-        permissions();
+        mEtPassWord.setText("123456789");
     }
 
     //给用户输入框添加监听
@@ -188,7 +186,6 @@ public class LoginActivity extends BaseActivity {
                 if (res == 200) {// 登录成功
                     LoginEntity loginData = JSON.parseObject(result.getData().toString(), LoginEntity.class);
                     if (loginData != null) {
-                        saveData(loginData);
                         //获取融云token
                         getRongToken(loginData);
                     }
@@ -209,12 +206,11 @@ public class LoginActivity extends BaseActivity {
 
     }
 
+
     //保存用户的信息
     private void saveData(LoginEntity loginData) {
         PreferencesUtils.putString(this, Const.ACCESS_TOKEN, loginData.getAccess_token());
-
         PreferencesUtils.putString(this, Const.MOBILE_PHONE, username);
-
         PreferencesUtils.putInt(this, Const.USER_ID, loginData.getUser_id());
     }
 
@@ -244,7 +240,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     //获取融云的token
-    private void getRongToken(LoginEntity loginData) {
+    private void getRongToken(final LoginEntity loginData) {
         ApiService api = RetrofitClient.getInstance(this).Api();
         Map<String, Object> params = new HashMap<>();
         params.put("mobilephone", username);
@@ -271,7 +267,7 @@ public class LoginActivity extends BaseActivity {
                         RToken = rcEntity.getRc_token();
                         PreferencesUtils.putString(LoginActivity.this, Const.RC_TOKEN, RToken);
                         //连接融云服务器
-                        connect(RToken);
+                        connect(RToken,loginData);
                     }
 
 
@@ -297,7 +293,7 @@ public class LoginActivity extends BaseActivity {
      * @param token 从服务端获取的用户身份令牌（Token）。
      * @return RongIM  客户端核心类的实例。
      */
-    private void connect(String token) {
+    private void connect(final String token, final LoginEntity loginData) {
 
         Log.i(TAG, "connect: 开始连接融云");
         if (getApplicationInfo().packageName.equals(getCurProcessName(getApplicationContext()))) {
@@ -320,9 +316,10 @@ public class LoginActivity extends BaseActivity {
                  */
                 @Override
                 public void onSuccess(String userid) {
-                    Log.i("hello", "onSuccess: " + "融云链接成功" + userid);
+                   //Log.i("hello", "onSuccess: " + "融云链接成功" + token);
                     loading(false);
                     skipPageWithAnim(MainActivity.class);
+                    saveData(loginData);
 
                     finish();
                 }
@@ -333,39 +330,11 @@ public class LoginActivity extends BaseActivity {
                  */
                 @Override
                 public void onError(RongIMClient.ErrorCode errorCode) {
-                    Log.i("hello", "onError: " + "融云链接失败");
+                   Toast.makeText(mContext,"登陆失败",Toast.LENGTH_SHORT).show();
+                    loading(false);
                 }
             });
         }
-    }
-
-    /**
-     * 获取权限
-     */
-    private void permissions() {
-        HiPermission.create(mContext)
-                .checkMutiPermission(new PermissionCallback() {
-                    @Override
-                    public void onClose() {
-                        //Log.i(TAG, "onClose");
-                        showToast("您已取消同意权限");
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        //showToast("All permissions requested completed");
-                    }
-
-                    @Override
-                    public void onDeny(String permission, int position) {
-                        //Log.i(TAG, "onDeny");
-                    }
-
-                    @Override
-                    public void onGuarantee(String permission, int position) {
-                        //Log.i(TAG, "onGuarantee");
-                    }
-                });
     }
 
     @Override

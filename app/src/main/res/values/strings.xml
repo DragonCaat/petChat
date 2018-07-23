@@ -2,5 +2,6 @@
     <string name="app_name">联萌</string>
 
 
+    <string name="name">联萌</string>
     <string name="viewpager_indicator"></string>
 </resources>

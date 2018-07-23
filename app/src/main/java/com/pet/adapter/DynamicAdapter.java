@@ -11,10 +11,8 @@ import com.bumptech.glide.Glide;
 import com.pet.R;
 import com.pet.bean.Const;
 import com.pet.bean.DynamicEntity;
-import com.pet.bean.NineGridTestModel;
-import com.pet.view.NineGridTestLayout;
+import com.pet.ninelayout.NineGridTestLayout;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;

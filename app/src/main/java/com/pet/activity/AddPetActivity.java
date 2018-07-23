@@ -8,7 +8,9 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -37,6 +39,7 @@ import org.feezu.liuli.timeselector.TimeSelector;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +63,8 @@ public class AddPetActivity extends BaseActivity {
     public static final int REQUEST_CAMERA = 3;// 宠物真实图片拍照
     public static final int PHOTO_GALLERY = 2; // 相册
     public static final String IMAGE_UNSPECIFIED = "image/*";//随意图片类型
+
+    public static final int PHOTO_REQUEST_CUT = 5;//裁剪图片
     @BindView(R.id.ll_girl)
     LinearLayout llGirl;
     @BindView(R.id.iv_girl)
@@ -95,8 +100,9 @@ public class AddPetActivity extends BaseActivity {
 
     private String pet_icon = "";//宠物头像路径
     private String img_url = "";//宠物真实图片
-    Map<String, RequestBody> bodyPetIcon;
-    Map<String, RequestBody> bodyPetImage;
+    private Map<String, RequestBody> bodyPetIcon;
+    private Map<String, RequestBody> bodyPetImage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,7 +155,7 @@ public class AddPetActivity extends BaseActivity {
             case R.id.tv_birthday:
                 selectTime(mTvBirthday);
                 break;
-                //宠物真实图片
+            //宠物真实图片
             case R.id.iv_add_pet_head:
                 photograph(this, REQUEST_CAMERA);
                 break;
@@ -255,65 +261,80 @@ public class AddPetActivity extends BaseActivity {
                     bodyPetIcon = filesToRequestBodyParts(file);
                 }
                 break;
-            //相册返回数据
+            //相机返回数据
             case REQUEST_CODE_CAMERA:
-                if (data != null) {
-                    // 获取相机返回的数据，并转换为Bitmap图片格式，这是缩略图
-                    Bundle bundle1 = data.getExtras();
-                    if (bundle1==null)
-                        return;
-                    Bitmap bitmap1 = (Bitmap) bundle1.get("data");
-
-                    Uri uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(), bitmap1, null, null));
-                    // Log.i("hello", "onActivityResult: " + uri);
-                    Cursor cursor1 = getContentResolver().query(uri, null, null, null, null);
-                    if (cursor1 != null && cursor1.moveToFirst()) {
-                        pet_icon = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
-                        if (TextUtils.isEmpty(pet_icon))
-                            Toast.makeText(mContext, "图像路径不存在", Toast.LENGTH_SHORT).show();
-                        else {
-                            // Log.i("hello", "onActivityResult: " + pet_icon);
-                            File file = new File(pet_icon);
-                            bodyPetIcon = filesToRequestBodyParts(file);
-                            Glide.with(mContext).load(uri).into(cvHead);
-                        }
+                // 获取相机返回的数据，并转换为Bitmap图片格式，这是缩略图
+                Bundle bundle1 = data.getExtras();
+                if (bundle1 == null)
+                    return;
+                Bitmap bitmap1 = (Bitmap) bundle1.get("data");
+                if (bitmap1 == null)
+                    return;
+                Uri uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(), bitmap1, null, null));
+                if (uri == null)
+                    return;
+                Cursor cursor1 = getContentResolver().query(uri, null, null, null, null);
+                if (cursor1 != null && cursor1.moveToFirst()) {
+                    pet_icon = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+                    if (TextUtils.isEmpty(pet_icon))
+                        Toast.makeText(mContext, "图像路径不存在", Toast.LENGTH_SHORT).show();
+                    else {
+                        File file = new File(pet_icon);
+                        bodyPetIcon = filesToRequestBodyParts(file);
+                        Glide.with(mContext).load(uri)
+                                .placeholder(R.mipmap.default_head)
+                                .into(cvHead);
                     }
-                } else {
+
+                } else
                     Toast.makeText(mContext, "取消拍照", Toast.LENGTH_SHORT).show();
-                }
                 break;
 
-            //真实图片
+
+            //相机返回宠物的真实图片
             case REQUEST_CAMERA:
                 if (data != null) {
                     Bundle bundle = data.getExtras();
                     // 获取相机返回的数据，并转换为Bitmap图片格式，这是缩略图
-                    if (bundle==null)
+                    if (bundle == null)
                         return;
                     Bitmap bitmap = (Bitmap) bundle.get("data");
                     if (bitmap == null)
                         return;
-                    Uri uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, null, null));
+                    Uri uri1 = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, null, null));
 
-                    Cursor cursor1 = getContentResolver().query(uri, null, null, null, null);
-                    if (cursor1 != null && cursor1.moveToFirst()) {
-                        img_url = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+                    Cursor cursor2 = getContentResolver().query(uri1, null, null, null, null);
+                    if (cursor2 != null && cursor2.moveToFirst()) {
+                        img_url = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
                         if (TextUtils.isEmpty(img_url))
                             Toast.makeText(mContext, "图像路径不存在", Toast.LENGTH_SHORT).show();
                         else {
                             // Log.i("hello", "onActivityResult: " + pet_icon);
                             File file = new File(img_url);
                             bodyPetImage = filesToRequestBodyPart(file);
-                            Glide.with(mContext).load(uri).into(mIvAddHead);
+                            Glide.with(mContext).load(uri1).into(mIvAddHead);
                         }
                     }
-                } else {
+                } else
                     Toast.makeText(mContext, "取消拍照", Toast.LENGTH_SHORT).show();
-                }
+
                 break;
 
             default:
                 break;
+        }
+
+    }
+
+    /**
+     * 判断sdcard是否被挂载
+     */
+    private boolean hasSdcard() {
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -330,7 +351,7 @@ public class AddPetActivity extends BaseActivity {
         params.put("pet_brith", petBirthday);
         params.put("pet_kind", petKind);
         params.put("pet_gender", petGender);
-        params.put("old_pet_id","");
+        params.put("old_pet_id", "");
         Call<ResultEntity> call = api.addPet(params, bodyPetIcon, bodyPetImage);
         call.enqueue(new retrofit2.Callback<ResultEntity>() {
             @Override
@@ -349,7 +370,6 @@ public class AddPetActivity extends BaseActivity {
                     finish();
                 } else {
                     hideLoadingDialog();
-                   // Log.i("hello", "onResponse: 失败");
                 }
 
             }
@@ -426,5 +446,25 @@ public class AddPetActivity extends BaseActivity {
             }
         }
         return data;
+    }
+
+
+    public void crop(Uri uri) {
+        // 裁剪图片意图
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+        intent.putExtra("crop", "true");
+        // 裁剪框的比例，1：1
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY", 1);
+        // 裁剪后输出图片的尺寸大小
+        intent.putExtra("outputX", 250);
+        intent.putExtra("outputY", 250);
+
+        intent.putExtra("outputFormat", "JPEG");// 图片格式
+        intent.putExtra("noFaceDetection", true);// 取消人脸识别
+        intent.putExtra("return-data", true);
+        // 开启一个带有返回值的Activity，请求码为PHOTO_REQUEST_CUT
+        startActivityForResult(intent, PHOTO_REQUEST_CUT);
     }
 }

@@ -1,5 +1,6 @@
 package com.pet.activity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,14 +14,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pet.R;
+import com.pet.bean.Const;
+import com.pet.bean.ResultEntity;
+import com.pet.retrofit.ApiService;
+import com.pet.retrofit.RetrofitClient;
 import com.pet.utils.CountDownTimerUtils;
 import com.pet.utils.FitStateUI;
+import com.pet.utils.PreferencesUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
+import retrofit2.Call;
+import retrofit2.Response;
 
 /**
  * 忘记密码页面
@@ -38,14 +49,22 @@ public class ForgetPassActivity extends BaseActivity {
     EditText mEtPhoneCode;
     @BindView(R.id.iv_back)
     ImageView mIvBack;
+    @BindView(R.id.et_check_pass)
+    EditText mEtNewPass;
+    @BindView(R.id.pass)
+    EditText mEtPass;
 
     private String phoneNumber;
     private String code;
+    private String newPass;
+    private String pass;
+
+    private ProgressDialog proDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FitStateUI.changeStatusBarTextColor(this,false);
+        FitStateUI.changeStatusBarTextColor(this, false);
         setStatusBarColor(R.color.main_color_press);
 
         setContentView(R.layout.activity_forget_pass);
@@ -54,7 +73,7 @@ public class ForgetPassActivity extends BaseActivity {
         initData();
     }
 
-    @OnClick({R.id.tv_code, R.id.btn_next,R.id.iv_back})
+    @OnClick({R.id.tv_code, R.id.btn_next, R.id.iv_back})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_code:
@@ -134,7 +153,7 @@ public class ForgetPassActivity extends BaseActivity {
                     mTvCode, 30000, 1000);
             mCountDownTimerUtils.start();
             //执行相关的网络代码
-
+            sendCode();
         }
     }
 
@@ -182,11 +201,13 @@ public class ForgetPassActivity extends BaseActivity {
      */
     private void checkData() {
         code = mEtPhoneCode.getText().toString().trim();
-        if (TextUtils.isEmpty(code)|| TextUtils.isEmpty(phoneNumber)){
-            showToast("手机号或者验证码不能为空");
-        }else {
-            //执行网络操作
-
+        newPass = mEtNewPass.getText().toString().trim();
+        pass = mEtPass.getText().toString().trim();
+        if (TextUtils.isEmpty(code) || TextUtils.isEmpty(phoneNumber) || TextUtils.isEmpty(newPass) || TextUtils.isEmpty(pass)) {
+            showToast("请填写完整数据");
+        } else {
+            //提交修改密码
+            checkSms();
         }
     }
 
@@ -199,4 +220,127 @@ public class ForgetPassActivity extends BaseActivity {
         super.onDestroy();
 
     }
+
+    //发送验证码
+    private void sendCode() {
+        final ApiService api = RetrofitClient.getInstance(mContext).Api();
+        Map<String, Object> params = new HashMap<>();
+        params.put("phone", phoneNumber);
+
+        Call<ResultEntity> call = api.sendSms(params);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 获取成功
+                    Toast.makeText(mContext, "验证码发送成功", Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> call, Throwable t) {
+
+            }
+        });
+    }
+
+    //忘记密码调用
+    private void forgetPass() {
+        showProgressDialog();
+        ApiService api = RetrofitClient.getInstance(this).Api();
+        Map<String, String> params = new HashMap<>();
+        params.put("mobilephone", phoneNumber);
+        params.put("password", newPass);
+        params.put("confirm_password", pass);
+        Call<ResultEntity> call = api.forgetPwd(params);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 注册成功
+                    //跳转登陆界面
+                    hideProgressDialog();
+                    Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+                    skipPageWithAnim(LoginActivity.class);
+                    finish();
+                } else {
+                    hideProgressDialog();
+                    Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> arg0, Throwable arg1) {
+
+            }
+        });
+    }
+
+
+    //检验验证码
+    private void checkSms() {
+        showProgressDialog();
+        ApiService api = RetrofitClient.getInstance(this).Api();
+        Map<String, String> params = new HashMap<>();
+        params.put("phone", phoneNumber);
+        params.put("code", code);
+        Call<ResultEntity> call = api.checkSms(params);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 注册成功
+                    //提交数据
+                    boolean data = (boolean) result.getData();
+                    if (data)
+                    forgetPass();
+                    else {
+                        hideProgressDialog();
+                        Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    hideProgressDialog();
+                    Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> arg0, Throwable arg1) {
+
+            }
+        });
+    }
+
+
+    //展示加载对话框
+    private void showProgressDialog() {
+        proDialog = android.app.ProgressDialog.show(this, "", "正在提交...");
+        proDialog.setCanceledOnTouchOutside(true);
+    }
+
+    private void hideProgressDialog() {
+        if (proDialog != null)
+            proDialog.dismiss();
+    }
+
 }

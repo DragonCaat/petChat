@@ -59,6 +59,9 @@ import top.zibin.luban.OnCompressListener;
  */
 public class PublishActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 732;
+    //获取位置
+    public static final int GET_LOCATION = 731;
+
     //用于存放图片的返回地址
     private ArrayList<String> mResults = new ArrayList<>();
     //压缩后的图片地址
@@ -74,6 +77,8 @@ public class PublishActivity extends AppCompatActivity {
     EditText mEtInput;
     @BindView(R.id.tv_title)
     TextView mTvTitle;
+    @BindView(R.id.tv_show_location)
+    TextView mTvLocation;
 
     //latitude longitude user_address content
     private int user_id = 0;
@@ -82,7 +87,10 @@ public class PublishActivity extends AppCompatActivity {
     private String phone = "";
     private double latitude = 0;
     private double longitude = 0;
-    private String user_address = "";
+
+    private String location = "";
+
+    private int circle_id = 0;
 
     private PopupWindow popupWindow;
     /**
@@ -105,6 +113,9 @@ public class PublishActivity extends AppCompatActivity {
         Intent intent = getIntent();
         //获取发布的flag
         PUBLISH_FLAG = intent.getIntExtra("flag", 0);
+
+        circle_id = intent.getIntExtra("id", 0);
+
         setContentView(R.layout.activity_publish);
         mContext = this;
         ButterKnife.bind(this);
@@ -137,9 +148,10 @@ public class PublishActivity extends AppCompatActivity {
     @OnClick({R.id.iv_back, R.id.ll_add_location, R.id.btn_publish})
     public void onClick(View view) {
         switch (view.getId()) {
+            //获取定位数据
             case R.id.ll_add_location:
                 Intent intent = new Intent(mContext, GetLocationActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, GET_LOCATION);
                 break;
 
             case R.id.iv_back:
@@ -161,9 +173,9 @@ public class PublishActivity extends AppCompatActivity {
         content = mEtInput.getText().toString().trim();
         if (TextUtils.isEmpty(content))
             Toast.makeText(mContext, "写点什么吧", Toast.LENGTH_SHORT).show();
-        else if (mResults==null||mResults.size()==0){
+        else if (mResults == null || mResults.size() == 0) {
             Toast.makeText(mContext, "必须添加图片", Toast.LENGTH_SHORT).show();
-        }else {
+        } else {
             //上传数据
             compressImages();
         }
@@ -191,10 +203,10 @@ public class PublishActivity extends AppCompatActivity {
     @SuppressLint("DefaultLocale")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // get selected images from selector
-        if (requestCode == REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                mResults = data.getStringArrayListExtra(SelectorSettings.SELECTOR_RESULTS);
+        switch (requestCode) {
+            case REQUEST_CODE:
+                if (data != null)
+                    mResults = data.getStringArrayListExtra(SelectorSettings.SELECTOR_RESULTS);
                 if (mResults.size() > 0) {
                     adapter = new GridViewShowPicAdapter(this, mResults);
                     mGridView.setAdapter(adapter);
@@ -202,7 +214,16 @@ public class PublishActivity extends AppCompatActivity {
                 } else {
 
                 }
-            }
+                break;
+            //获取定位数据
+            case GET_LOCATION:
+                if (data != null) {
+                    location = data.getStringExtra("location");
+                    latitude = data.getDoubleExtra("latitude", 0);
+                    longitude = data.getDoubleExtra("longitude", 0);
+                    mTvLocation.setText(location);
+                }
+                break;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -215,6 +236,9 @@ public class PublishActivity extends AppCompatActivity {
         params.put("access_token", acces_token);
         params.put("mobilephone", phone);
         params.put("content", content);
+        params.put("user_address", location);
+        params.put("latitude", latitude);
+        params.put("longitude", longitude);
         Call<ResultEntity> call = api.CreateDynamic(params, partList);
         call.enqueue(new retrofit2.Callback<ResultEntity>() {
             @Override
@@ -228,12 +252,12 @@ public class PublishActivity extends AppCompatActivity {
                 int res = result.getCode();
                 if (res == 200) {// 获取成功
                     hideLoadingDialog();
-                    //Log.i("hello", "onResponse: 成功");
+                    //成功后删除临时文件
                     deleteFile(new File(path));
                     finish();
                 } else {
                     hideLoadingDialog();
-                    //Log.i("hello", "onResponse: 失败");
+
                 }
 
             }
@@ -244,6 +268,52 @@ public class PublishActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    //发布随手拍
+    private void CreatesNapshot(Map<String, RequestBody> partList) {
+        ApiService api = RetrofitClient.getInstance(this).Api();
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", user_id);
+        params.put("access_token", acces_token);
+        params.put("mobilephone", phone);
+        params.put("content", content);
+        params.put("address", location);
+        params.put("latitude", latitude);
+        params.put("longitude", longitude);
+
+        params.put("circle_id", circle_id);
+
+        Call<ResultEntity> call = api.CreatesNapshot(params, partList);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 获取成功
+                    hideLoadingDialog();
+                    //成功后删除临时文件
+                    deleteFile(new File(path));
+                    finish();
+                } else {
+                    hideLoadingDialog();
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> call, Throwable t) {
+
+            }
+        });
+    }
+
 
     private Map<String, RequestBody> filesToRequestBodyParts(List<File> files) {
         Map<String, RequestBody> parts = new HashMap<>();
@@ -282,7 +352,10 @@ public class PublishActivity extends AppCompatActivity {
                                 fileList.add(file1);
                             }
                             Map<String, RequestBody> bodyMap = filesToRequestBodyParts(fileList);
-                            CreateDynamic(bodyMap);
+                            if (PUBLISH_FLAG == 0)
+                                CreateDynamic(bodyMap);//0：发动态
+                            else
+                                CreatesNapshot(bodyMap);//1：发随手拍
                         }
 
                     }

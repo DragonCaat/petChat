@@ -36,21 +36,81 @@
             android:background="@color/white"
             android:orientation="vertical">
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:gravity="left|center"
+                    android:paddingStart="18dp"
+                    android:text="分享宠物位置"
+                    android:textColor="#232323"
+                    android:textSize="16sp" />
+
+
+                <com.pet.view.SlideButton
+                    android:id="@+id/slb_pet_location"
+                    android:layout_marginEnd="10dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_width="60dp"
+                    android:layout_height="30dp" />
+            </RelativeLayout>
+
             <View
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="18dp"
                 android:background="@color/gray_answer" />
-
-            <TextView
-                android:id="@+id/tv_my_data"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="left|center"
-                android:paddingStart="18dp"
-                android:text="个人资料"
-                android:textColor="#232323"
-                android:textSize="16sp" />
+                android:layout_height="50dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:gravity="left|center"
+                    android:paddingStart="18dp"
+                    android:text="接受寄养"
+                    android:textColor="#232323"
+                    android:textSize="16sp" />
+
+
+                <com.pet.view.SlideButton
+                    android:id="@+id/slb_pet_foster"
+                    android:layout_marginEnd="10dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_width="60dp"
+                    android:layout_height="30dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="18dp"
+                android:background="@color/gray_answer" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:gravity="left|center"
+                    android:paddingStart="18dp"
+                    android:text="接受约宠"
+                    android:textColor="#232323"
+                    android:textSize="16sp" />
+
+
+                <com.pet.view.SlideButton
+                    android:id="@+id/slb_pet_appoint"
+                    android:layout_marginEnd="10dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_width="60dp"
+                    android:layout_height="30dp" />
+            </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -59,12 +119,13 @@
                 android:background="@color/gray_answer" />
 
             <TextView
+                android:id="@+id/tv_forget_pass"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="?android:attr/selectableItemBackground"
                 android:gravity="left|center"
                 android:paddingStart="18dp"
-                android:text="账号安全"
+                android:text="忘记密码"
                 android:textColor="#232323"
                 android:textSize="16sp"  />
 
@@ -93,6 +154,7 @@
                 android:background="@color/gray_answer" />
 
             <TextView
+                android:id="@+id/tv_message"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="?android:attr/selectableItemBackground"
@@ -109,6 +171,7 @@
                 android:background="@color/gray_answer" />
 
             <TextView
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="?android:attr/selectableItemBackground"
@@ -119,6 +182,7 @@
                 android:textSize="16sp"  />
 
             <View
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:background="@color/gray_answer" />
@@ -141,6 +205,7 @@
             android:background="@color/gray_answer" />
 
             <TextView
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="?android:attr/selectableItemBackground"
@@ -151,6 +216,7 @@
                 android:textSize="16sp"  />
 
             <View
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginStart="18dp"
@@ -191,6 +257,7 @@
                 android:layout_height="20dp"
                 android:background="@color/gray_answer" />
             <TextView
+                android:id="@+id/tv_login_out"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="?android:attr/selectableItemBackground"

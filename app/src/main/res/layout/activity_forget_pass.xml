@@ -128,14 +128,42 @@
                 android:src="@mipmap/pass" />
 
             <EditText
-                android:id="@+id/et_check_pass"
+                android:id="@+id/pass"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginStart="4dp"
                 android:background="@null"
                 android:hint="新密码"
                 android:inputType="textPassword"
-                android:maxLength="14"
+                android:paddingStart="10dp"
+                android:textColorHint="@color/hint_color"
+                android:textSize="14sp"
+                tools:ignore="RtlSymmetry" />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/pass" />
+
+            <EditText
+                android:id="@+id/et_check_pass"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="4dp"
+                android:background="@null"
+                android:hint="确认新密码"
+                android:inputType="textPassword"
                 android:paddingStart="10dp"
                 android:textColorHint="@color/hint_color"
                 android:textSize="14sp"

@@ -76,8 +76,8 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             tvPetKind = itemView.findViewById(R.id.tv_pet_kind);
             tvPetGender = itemView.findViewById(R.id.tv_pet_gender);
             tvPetStatue = itemView.findViewById(R.id.tv_pet_statue);
-
             ivStautue = itemView.findViewById(R.id.iv_statues);
+
             llDelete = itemView.findViewById(R.id.ll_delete);
         }
     }
@@ -105,9 +105,10 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof ViewHolder) {
-            CutePetEntity entity = list.get(position);
+            final CutePetEntity entity = list.get(position);
+
             if (entity.getPet_gender() == 1)
                 ((ViewHolder) holder).tvPetGender.setText("女");
             else
@@ -123,10 +124,23 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 ((ViewHolder) holder).ivStautue.setImageResource(R.mipmap.check_false);
             else
                 ((ViewHolder) holder).ivStautue.setImageResource(R.mipmap.check_true);
+
+            //宠物图片
             Glide.with(mContext)
                     .load(Const.PIC_URL + entity.getPet_icon())
+                    .dontAnimate()
                     .placeholder(R.mipmap.take_photo_loading)
                     .into(((ViewHolder) holder).cvPetHead);
+            //删除宠物
+            ((ViewHolder) holder).llDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    showDialog(entity.getPet_id(), position);
+                }
+            });
+
+            //添加宠物
         } else {
             ((BottomViewHolder) holder).ivAddPet.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -136,13 +150,6 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 }
             });
         }
-        //删除宠物
-        ((ViewHolder) holder).llDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDialog();
-            }
-        });
 
 
     }
@@ -161,7 +168,7 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
 
-    private void showDialog() {
+    private void showDialog(final int id, final int position) {
         //    通过AlertDialog.Builder这个类来实例化我们的一个AlertDialog的对象
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         //    设置Title的图标
@@ -174,7 +181,7 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.i("hello", "onClick: ");
+                deletePet(id,position);
             }
         });
         //    设置一个NegativeButton
@@ -189,7 +196,7 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     //删除宠物
-    private void deletePet() {
+    private void deletePet(int id, final int position) {
         user_id = PreferencesUtils.getInt(mContext, Const.USER_ID, 0);
         acces_token = PreferencesUtils.getString(mContext, Const.ACCESS_TOKEN);
         phone = PreferencesUtils.getString(mContext, Const.MOBILE_PHONE);
@@ -199,8 +206,8 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         params.put("access_token", acces_token);
         params.put("mobilephone", phone);
         params.put("app_Key", "yunmiao");
-        params.put("", "");
-        Call<ResultEntity> call = api.PetManage(params);
+        params.put("pet_id", id);
+        Call<ResultEntity> call = api.deletePet(params);
         call.enqueue(new retrofit2.Callback<ResultEntity>() {
             @Override
             public void onResponse(Call<ResultEntity> call,
@@ -211,7 +218,8 @@ public class PetManageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 ResultEntity result = response.body();
                 int res = result.getCode();
                 if (res == 200) {// 获取成功
-
+                    list.remove(position);
+                    notifyDataSetChanged();
                 } else
                     Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
             }

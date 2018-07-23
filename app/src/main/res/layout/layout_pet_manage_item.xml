@@ -141,6 +141,7 @@
         </LinearLayout>
 
         <Button
+            android:visibility="gone"
             android:layout_width="110dp"
             android:layout_height="30dp"
             android:layout_gravity="right"

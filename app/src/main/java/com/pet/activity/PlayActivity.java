@@ -32,21 +32,10 @@ public class PlayActivity extends AppCompatActivity {
         }
 
 
-        initData();
+       // initData();
     }
 
-    private void initData() {
-        mRecyclerView =  findViewById(R.id.cusom_swipe_view);
-        // 设置指示器
-        mRecyclerView.setIndicator((PageIndicatorView) findViewById(R.id.indicator));
-        // 设置行数和列数
-        mRecyclerView.setPageSize(1, 1);
 
-        // 设置页间距
-        mRecyclerView.setPageMargin(0);
-        // 设置数据
-        mRecyclerView.setAdapter(mRecyclerView.new PageAdapter(list_tequan1,PlayActivity.this));
-    }
 
 
 

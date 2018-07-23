@@ -7,7 +7,7 @@
     <View
         android:background="@color/main_color_press"
         android:layout_width="match_parent"
-        android:layout_height="14dp"/>
+        android:layout_height="10dp"/>
     <TextView
         android:text="消息"
         android:gravity="center"

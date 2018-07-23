@@ -1,5 +1,6 @@
 package com.pet.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,6 +46,7 @@ import retrofit2.Response;
  * 动态的fragment
  */
 
+@SuppressLint("ValidFragment")
 public class AttentionFragment extends Fragment {
 
     private Context mContext;
@@ -70,12 +72,20 @@ public class AttentionFragment extends Fragment {
     private List<AttentionEntity> list;
     private List<AttentionEntity> dataSet;
 
+
+    @SuppressLint("ValidFragment")
+    public AttentionFragment(int user_id_) {
+        this.user_id = user_id_;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_fouces, null);
         mContext = getActivity();
-        user_id = PreferencesUtils.getInt(getActivity(), Const.USER_ID, 0);
+        if (user_id == 0)
+            user_id = PreferencesUtils.getInt(getActivity(), Const.USER_ID, 0);
+
         acces_token = PreferencesUtils.getString(getActivity(), Const.ACCESS_TOKEN);
         phone = PreferencesUtils.getString(getActivity(), Const.MOBILE_PHONE);
         ButterKnife.bind(this, view);
@@ -94,8 +104,13 @@ public class AttentionFragment extends Fragment {
                 //刷新
                 if (list == null)
                     getData();
-                else
-                    xRecyclerView.refreshComlete();
+                else {
+                    list = null;
+                    pageno = 0;
+                    isFirst = true;
+                    getData();
+                }
+
             }
 
             @Override
@@ -104,8 +119,8 @@ public class AttentionFragment extends Fragment {
                 if (!noData) {
                     pageno++;
                     getData();
-                }
-
+                }else
+                    xRecyclerView.refreshComlete();
             }
         });
     }
@@ -135,10 +150,11 @@ public class AttentionFragment extends Fragment {
                     if (isFirst) {
                         isFirst = false;
                         list = JSON.parseArray(result.getData().toString(), AttentionEntity.class);
-                        if (list!=null && list.size()>0){
+                        if (list != null && list.size() > 0) {
                             adapter = new AttentionAdapter(list, mContext);
+                            adapter.notifyDataSetChanged();
                             mIvNoAttention.setVisibility(View.INVISIBLE);
-                        }else {
+                        } else {
                             mIvNoAttention.setVisibility(View.VISIBLE);
                         }
                         xRecyclerView.refreshComlete();
@@ -156,8 +172,12 @@ public class AttentionFragment extends Fragment {
                     }
                     xRecyclerView.verticalLayoutManager().setAdapter(adapter);
 
-                } else
-                    Toast.makeText(getActivity(), "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+                } else{
+                    Toast.makeText(mContext, "没数据了", Toast.LENGTH_SHORT).show();
+                    noData = true;
+                    xRecyclerView.refreshComlete();
+                }
+
             }
 
             @Override

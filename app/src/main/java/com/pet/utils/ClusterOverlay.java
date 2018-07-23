@@ -1,5 +1,6 @@
 package com.pet.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -49,7 +50,7 @@ import static com.pet.fragment.MapFragment.convertViewToBitmap;
 public class ClusterOverlay implements AMap.OnCameraChangeListener,
         AMap.OnMarkerClickListener {
     private AMap mAMap;
-    private Context mContext;
+    private Activity mContext;
     //包含聚合点头像的item
     private List<ClusterItem> mClusterItems;
     private List<Cluster> mClusters;
@@ -72,7 +73,7 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
     /**
      * func:添加marker到地图上显示
      */
-    BitmapDescriptor bitmapDescriptor;
+   // BitmapDescriptor bitmapDescriptor;
 
     /**
      * 构造函数
@@ -82,7 +83,7 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
      * @param context
      */
     public ClusterOverlay(AMap amap, int clusterSize, Context context) {
-        this(amap, null, clusterSize, context);
+        this(amap, null, clusterSize, (Activity) context);
 
 
     }
@@ -95,7 +96,7 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
      * @param context
      */
     public ClusterOverlay(AMap amap, List<ClusterItem> clusterItems,
-                          int clusterSize, Context context) {
+                          int clusterSize, Activity context) {
         //默认最多会缓存80张图片作为聚合显示元素图片,根据自己显示需求和app使用内存情况,可以修改数量
         mLruCache = new LruCache<Integer, BitmapDescriptor>(80) {
             protected void entryRemoved(boolean evicted, Integer key, BitmapDescriptor oldValue, BitmapDescriptor newValue) {
@@ -237,9 +238,9 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
 
         markerOptions.icon(getBitmapDes(cluster.getClusterCount(),cluster.getClusterItems()));
 
+
+
         markerOptions.position(latlng);
-
-
         Marker marker = mAMap.addMarker(markerOptions);
         //设置单个加载marker的动画
         marker.setAnimation(alphaAnimation);
@@ -247,9 +248,7 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
         marker.startAnimation();
         cluster.setMarker(marker);
 
-
         mAddMarkers.add(marker);
-
 
     }
 
@@ -273,7 +272,7 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
                     public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
                         //待图片加载完毕后再设置bitmapDes
                         icon.setImageBitmap(bitmap);
-                        bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(convertViewToBitmap(markerView));
+                       // bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(convertViewToBitmap(markerView));
                         listener.markerIconLoadingFinished(markerView);
                     }
                 });
@@ -392,11 +391,10 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
         return null;
     }
 
-
     /**
      * 获取每个聚合点的绘制样式
      */
-    private BitmapDescriptor getBitmapDes(int num,List<ClusterItem> mClusterItems){
+    private BitmapDescriptor getBitmapDes(final int num, final List<ClusterItem> mClusterItems){
         BitmapDescriptor bitmapDescriptor = mLruCache.get(num);
         final View markerView = LayoutInflater.from(mContext).inflate(R.layout.layout_marker_item, null);
 
@@ -408,20 +406,6 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
                 textView.setText(tile);
                 circleImageView.setVisibility(View.INVISIBLE);
             } else {
-//                Glide.with(mContext)
-//                        .load(mClusterItems.get(num-1).getUrl())
-//                        .asBitmap()
-//                        .thumbnail(0.2f)
-//                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-//                        .centerCrop()
-//                        .into(new SimpleTarget<Bitmap>() {
-//                            @Override
-//                            public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
-//                                //待图片加载完毕后再设置bitmapDes
-//                                circleImageView.setImageBitmap(bitmap);
-//                            }
-//                        });
-
                 circleImageView.setVisibility(View.VISIBLE);
             }
 
@@ -439,24 +423,30 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
      *
      * @return
      */
-    private void customizeMarkerIcon(String url, final OnMarkerIconLoadListener listener) {
+    private void customizeMarkerIcon(final String url, final OnMarkerIconLoadListener listener) {
         final View markerView = LayoutInflater.from(mContext).inflate(R.layout.layout_marker_item, null);
         final CircleImageView circleImageView = markerView.findViewById(R.id.pet_photo);
-        Glide.with(mContext)
-                .load(url)
-                .asBitmap()
-                .thumbnail(0.2f)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .centerCrop()
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
-                        //待图片加载完毕后再设置bitmapDes
-                        circleImageView.setImageBitmap(bitmap);
-                        bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(convertViewToBitmap(markerView));
-                        listener.markerIconLoadingFinished(markerView);
-                    }
-                });
+
+        mContext.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Glide.with(mContext)
+                        .load(url)
+                        .asBitmap()
+                        .thumbnail(0.2f)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .centerCrop()
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
+                                //待图片加载完毕后再设置bitmapDes
+                                circleImageView.setImageBitmap(bitmap);
+                               // bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(convertViewToBitmap(markerView));
+                                listener.markerIconLoadingFinished(markerView);
+                            }
+                        });
+            }
+        });
 
     }
 
@@ -471,8 +461,9 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
      * 更新已加入地图聚合点的样式
      */
     private void updateCluster(Cluster cluster) {
-
         Marker marker = cluster.getMarker();
+
+
         marker.setIcon(getBitmapDes(cluster.getClusterCount(),cluster.getClusterItems()));
 
 
@@ -504,6 +495,17 @@ public class ClusterOverlay implements AMap.OnCameraChangeListener,
             mRemoveMarkers.clear();
         }
     }
+
+    public void cleanAllMarkers(){
+        if (mAddMarkers!=null && mAddMarkers.size()>0){
+            for (Marker marker : mAddMarkers) {
+                marker.remove();
+            }
+            mAddMarkers.clear();
+        }
+
+    }
+
 
     /**
      * 处理market添加，更新等操作

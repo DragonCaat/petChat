@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    tools:context="com.pet.activity.TopicDetailActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/main_color_press">
+
+            <ImageView
+                android:id="@+id/iv_back"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:padding="6dp"
+                android:scaleType="center"
+                android:src="@mipmap/back" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="动态"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+            <ImageView
+                android:id="@+id/iv_delete"
+                android:visibility="gone"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_centerInParent="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="15dp"
+                android:scaleType="center"
+                android:background="@mipmap/delete" />
+
+        </RelativeLayout>
+
+
+        <me.shihao.library.XRecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="45dp"
+            android:layout_height="match_parent"/>
+
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/gray_">
+
+        <ScrollView
+            android:scrollbars="none"
+            android:id="@+id/scrollView2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/gray_" />
+
+                <LinearLayout
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginRight="6dp"
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp">
+
+                    <EditText
+                        android:id="@+id/et_userAnswer"
+                        android:layout_width="0dp"
+                        android:layout_weight="8"
+                        android:layout_height="40dp"
+                        android:background="@drawable/input_rectangle"
+                        android:hint="说点什么..."
+                        android:maxLines="3"
+                        android:paddingStart="10dp"
+                        android:textSize="15sp"
+                        tools:ignore="RtlSymmetry" />
+                    <Button
+                        android:id="@+id/btn_send"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/black"
+                        android:text="确认"
+                        android:background="@drawable/button_selector_small"
+                        android:layout_width="60dp"
+                        android:layout_height="30dp" />
+
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/gray_" />
+
+            </LinearLayout>
+        </ScrollView>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_loading"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/rectangle_half_color"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/loading"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:indicatorName="BallPulseIndicator" />
+    </LinearLayout>
+
+</RelativeLayout>

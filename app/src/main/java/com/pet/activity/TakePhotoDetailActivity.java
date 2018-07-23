@@ -4,15 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toolbar;
@@ -68,6 +71,7 @@ public class TakePhotoDetailActivity extends AppCompatActivity {
     private String content = "";
 
     private Context mContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +89,7 @@ public class TakePhotoDetailActivity extends AppCompatActivity {
         initData();
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
+
     }
 
     private void initFragmentTab() {
@@ -121,7 +126,8 @@ public class TakePhotoDetailActivity extends AppCompatActivity {
             //加入话题按钮
             case R.id.join_topic:
                 Intent intent = new Intent(mContext, PublishActivity.class);
-                intent.putExtra("flag",1);
+                intent.putExtra("flag", 1);
+                intent.putExtra("id", id);
                 startActivity(intent);
                 break;
 
@@ -148,5 +154,26 @@ public class TakePhotoDetailActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        hotTakePhotoFragment = null;
+        newTakePhotoFragment = null;
+    }
+
+    @Override
+    public void onActivityReenter(int requestCode, Intent data) {
+        super.onActivityReenter(requestCode, data);
+
+        if (data.getIntExtra("flag", 0) == 1) {
+            hotTakePhotoFragment.getActivityData(data);
+            hotTakePhotoFragment.initShareElement();
+
+        } else {
+            newTakePhotoFragment.getActivityData(data);
+            newTakePhotoFragment.initShareElement();
+        }
     }
 }

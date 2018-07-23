@@ -1,6 +1,7 @@
 package com.pet.activity;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -78,6 +79,8 @@ public class RegisterActivity extends BaseActivity {
     private String passWord = "";
     private String checkPass = "";
 
+
+    private ProgressDialog proDialog;
     @SuppressLint("HandlerLeak")
     public Handler handler = new Handler() {
         @Override
@@ -100,7 +103,7 @@ public class RegisterActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FitStateUI.changeStatusBarTextColor(this,false);
+        FitStateUI.changeStatusBarTextColor(this, false);
         setStatusBarColor(R.color.main_color_press);
 
         setContentView(R.layout.activity_register);
@@ -191,10 +194,83 @@ public class RegisterActivity extends BaseActivity {
             CountDownTimerUtils mCountDownTimerUtils = new CountDownTimerUtils(
                     mTvCode, 30000, 1000);
             mCountDownTimerUtils.start();
-            sendCode("86", phoneNumber);
+
+            sendCode();
 
         }
     }
+
+
+    //发送验证码
+    private void sendCode() {
+        final ApiService api = RetrofitClient.getInstance(mContext).Api();
+        Map<String, Object> params = new HashMap<>();
+        params.put("phone", phoneNumber);
+        Call<ResultEntity> call = api.sendSms(params);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 获取成功
+                    Toast.makeText(mContext, "验证码已发送", Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> call, Throwable t) {
+
+            }
+        });
+    }
+
+
+    //检验验证码
+    private void checkSms() {
+        showProgressDialog();
+        ApiService api = RetrofitClient.getInstance(this).Api();
+        Map<String, String> params = new HashMap<>();
+        params.put("phone", phoneNumber);
+        params.put("code", code);
+        Call<ResultEntity> call = api.checkSms(params);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 注册成功
+                    //提交数据
+                    boolean data = (boolean) result.getData();
+                    if (data)
+                        register();
+                    else{
+                        hideProgressDialog();
+                        Toast.makeText(mContext, "验证码错误" + result.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    hideProgressDialog();
+                    Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> arg0, Throwable arg1) {
+
+            }
+        });
+    }
+
 
     // 请求验证码，其中country表示国家代码，如“86”；phone表示手机号码，如“13800138000”
     public void sendCode(String country, String phone) {
@@ -209,7 +285,7 @@ public class RegisterActivity extends BaseActivity {
                 } else {
                     // TODO 处理错误的结果
                     handler.sendEmptyMessage(SEND_MESSAGE_FAIL);
-                    Log.i("hello", "checkCode: 验证码发送失败"+data.toString());
+                    Log.i("hello", "checkCode: 验证码发送失败" + data.toString());
                 }
 
             }
@@ -239,7 +315,7 @@ public class RegisterActivity extends BaseActivity {
 
     //注册
     private void register() {
-        loading(true);
+        //loading(true);
         ApiService api = RetrofitClient.getInstance(this).Api();
         Map<String, String> params = new HashMap<>();
         params.put("mobilephone", phoneNumber);
@@ -258,11 +334,11 @@ public class RegisterActivity extends BaseActivity {
                 int res = result.getCode();
                 if (res == 200) {// 注册成功
                     //跳转主界面
-                    loading(false);
+                    Toast.makeText(mContext, "注册成功", Toast.LENGTH_SHORT).show();
                     skipPageWithAnim(LoginActivity.class);
                     finish();
                 } else {
-                    loading(false);
+                    //loading(false);
                     Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
 
                 }
@@ -290,7 +366,7 @@ public class RegisterActivity extends BaseActivity {
             Toast.makeText(mContext, "请填写完整信息", Toast.LENGTH_SHORT).show();
         else
             //submitCode("86", phoneNumber, code);
-            register();
+           checkSms();
     }
 
     //加载条
@@ -310,5 +386,16 @@ public class RegisterActivity extends BaseActivity {
         super.onDestroy();
         //用完回调要注销掉，否则可能会出现内存泄露
         SMSSDK.unregisterAllEventHandler();
+    }
+
+    //展示加载对话框
+    private void showProgressDialog() {
+        proDialog = android.app.ProgressDialog.show(this, "", "正在提交...");
+        proDialog.setCanceledOnTouchOutside(true);
+    }
+
+    private void hideProgressDialog() {
+        if (proDialog != null)
+            proDialog.dismiss();
     }
 }

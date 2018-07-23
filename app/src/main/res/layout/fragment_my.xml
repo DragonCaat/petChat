@@ -90,7 +90,6 @@
                                 android:gravity="center"
                                 android:maxLength="10"
                                 android:singleLine="true"
-                                android:text="Amio"
                                 android:textColor="@color/white"
                                 android:textSize="18sp"
                                 android:textStyle="bold" />

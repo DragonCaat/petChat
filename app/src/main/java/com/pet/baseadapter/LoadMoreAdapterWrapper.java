@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import com.pet.R;
 import com.pet.bean.DynamicEntity;
 
-import org.w3c.dom.Text;
-
 /**
  * Created by dragon on 2018/5/1.
  * 在这个装饰器中，只做与加载更多相关操作。
@@ -17,13 +15,13 @@ import org.w3c.dom.Text;
 
 public class LoadMoreAdapterWrapper extends BaseAdapter<DynamicEntity> {
 
-    private BaseAdapter mAdapter;
+    private BaseAdapter<DynamicEntity> mAdapter;
     private static final int mPageSize = 3;
     private int mPagePosition = 0;
     private boolean hasMoreData = true;
     private OnLoad mOnLoad;
 
-    public LoadMoreAdapterWrapper(BaseAdapter adapter, OnLoad onLoad) {
+    public LoadMoreAdapterWrapper(BaseAdapter<DynamicEntity> adapter, OnLoad onLoad) {
         this.mAdapter = adapter;
         this.mOnLoad = onLoad;
     }

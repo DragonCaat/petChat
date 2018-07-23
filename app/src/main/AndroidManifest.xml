@@ -2,6 +2,35 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pet">
 
+    <!-- 极光推送Required -->
+    <permission
+        android:name="com.pet.permission.JPUSH_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <!--内部安装需要的权限-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Required  一些系统要求的权限，如访问网络等 -->
+    <uses-permission android:name="com.pet.permission.JPUSH_MESSAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- Optional for location -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 用于开启 debug 版本的应用在6.0 系统上 层叠窗口权限 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <!-- 地图所需要的权限 -->
     <!-- 用于进行网络定位 -->
@@ -29,17 +58,36 @@
     <application
         android:name=".application.MyApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
             android:name="RONG_CLOUD_APP_KEY"
-            android:value="YvRJPiZA4vNu" />
+            android:value="k51hidwqkcs2b" />
+
+
+        <!-- User defined.  For test only  用户自定义的广播接收器 -->
+        <receiver
+            android:name=".receiver.MyReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="cn.jpush.android.intent.REGISTRATION" /> <!-- Required  用户注册SDK的intent -->
+                <action android:name="cn.jpush.android.intent.MESSAGE_RECEIVED" /> <!-- Required  用户接收SDK消息的intent -->
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_RECEIVED" /> <!-- Required  用户接收SDK通知栏信息的intent -->
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_OPENED" /> <!-- Required  用户打开自定义通知栏的intent -->
+                <action android:name="cn.jpush.android.intent.CONNECTION" /> <!-- 接收网络变化 连接/断开 since 1.6.3 -->
+                <category android:name="com.pet" />
+            </intent-filter>
+        </receiver>
+
 
         <!-- 主页面 -->
-        <activity android:name=".activity.MainActivity" />
+        <activity
+            android:name=".activity.MainActivity"
+            android:screenOrientation="portrait" />
         <!-- 高德地图配置 -->
         <meta-data
             android:name="com.amap.api.v2.apikey"
@@ -48,10 +96,13 @@
         <service android:name="com.amap.api.location.APSService" />
 
         <activity android:name=".activity.BaseActivity" />
+        <!-- 引导页面 -->
+        <activity android:name=".activity.GuideActivity" />
 
         <!-- 欢迎界面 -->
         <activity
             android:name=".activity.WelcomeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.white">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -61,17 +112,25 @@
         </activity>
 
         <!-- 登陆主界面 -->
-        <activity android:name=".activity.LoginActivity" />
+        <activity
+            android:name=".activity.LoginActivity"
+            android:screenOrientation="portrait" />
         <!-- 注册界面 -->
-        <activity android:name=".activity.RegisterActivity" />
+        <activity
+            android:name=".activity.RegisterActivity"
+            android:screenOrientation="portrait" />
 
         <!-- 随手拍详情界面 -->
         <activity
             android:name=".activity.TakePhotoDetailActivity"
-            android:theme="@style/AppTheme.transparent" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.transparent"
+            android:windowSoftInputMode="stateAlwaysHidden" />
 
         <!-- 设置页面 -->
-        <activity android:name=".activity.SetActivity" />
+        <activity
+            android:name=".activity.SetActivity"
+            android:screenOrientation="portrait" />
 
         <!-- 融云所需要的提供者 -->
         <provider
@@ -87,6 +146,7 @@
         <!-- 个人测试界面，上线后需要删除 -->
         <activity
             android:name=".activity.PlayActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.transparent" />
 
         <!-- 聊天界面 -->
@@ -110,45 +170,188 @@
         <activity android:name="com.zfdang.multiple_images_selector.ImagesSelectorActivity" />
 
         <!-- 忘记密码界面 -->
-        <activity android:name=".activity.ForgetPassActivity" />
+        <activity
+            android:name=".activity.ForgetPassActivity"
+            android:screenOrientation="portrait" />
         <!-- 图片查看器 -->
-        <activity android:name=".activity.ImagePagerActivity" />
+        <activity
+            android:name=".activity.ImagePagerActivity"
+            android:screenOrientation="portrait" />
         <!-- 完善用户信息的页面 -->
-        <activity android:name=".activity.CompileUserDataActivity" />
+        <activity
+            android:name=".activity.CompileUserDataActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <!-- 发布动态界面 -->
         <activity
             android:name=".activity.PublishActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
         <!-- 获取定位信息的界面 -->
-        <activity android:name=".activity.GetLocationActivity" />
+        <activity
+            android:name=".activity.GetLocationActivity"
+            android:screenOrientation="portrait" />
 
         <!-- 话题界面 -->
         <activity
             android:name=".activity.TopicDetailActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.all"
             android:windowSoftInputMode="stateAlwaysHidden" />
         <!-- 展示其他用户信息 -->
         <activity
             android:name=".activity.ShowUserActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.white" />
 
         <!-- 寄养申请页面 -->
-        <activity android:name=".activity.FillFosterActivity" />
+        <activity
+            android:name=".activity.FillFosterActivity"
+            android:screenOrientation="portrait" />
         <!-- 附近的人页面 -->
-        <activity android:name=".activity.NearPeopleActivity" />
+        <activity
+            android:name=".activity.NearPeopleActivity"
+            android:screenOrientation="portrait" />
         <!-- 添加宠物页面 -->
-        <activity android:name=".activity.AddPetActivity" />
+        <activity
+            android:name=".activity.AddPetActivity"
+            android:screenOrientation="portrait" />
         <!-- 选择宠物种类页面 -->
-        <activity android:name=".activity.PetSelectActivity" />
+        <activity
+            android:name=".activity.PetSelectActivity"
+            android:screenOrientation="portrait" />
         <!-- 宠物管理界面 -->
-        <activity android:name=".activity.PetManageActivity" />
+        <activity
+            android:name=".activity.PetManageActivity"
+            android:screenOrientation="portrait" />
         <!-- 关于我们界面 -->
-        <activity android:name=".activity.AboutOurActivity" />
-        <!--意见反馈界面-->
-        <activity android:name=".activity.SuggestActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden"
+        <activity
+            android:name=".activity.AboutOurActivity"
+            android:screenOrientation="portrait" />
+        <!-- 意见反馈界面 -->
+        <activity
+            android:name=".activity.SuggestActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan|stateHidden" />
+
+        <!-- Rich push 核心功能 since 2.0.6 -->
+        <activity
+            android:name="cn.jpush.android.ui.PopWinActivity"
+            android:exported="false"
+            android:theme="@style/MyDialogStyle" />
+
+        <!-- Required SDK核心功能 -->
+        <activity
+            android:name="cn.jpush.android.ui.PushActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:exported="false"
+            android:theme="@android:style/Theme.NoTitleBar">
+            <intent-filter>
+                <action android:name="cn.jpush.android.ui.PushActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.pet" />
+            </intent-filter>
+        </activity>
+
+        <!-- Required SDK 核心功能 -->
+        <!-- 可配置android:process参数将PushService放在其他进程中 -->
+        <service
+            android:name="cn.jpush.android.service.PushService"
+            android:exported="false"
+            android:process=":mult">
+            <intent-filter>
+                <action android:name="cn.jpush.android.intent.REGISTER" />
+                <action android:name="cn.jpush.android.intent.REPORT" />
+                <action android:name="cn.jpush.android.intent.PushService" />
+                <action android:name="cn.jpush.android.intent.PUSH_TIME" />
+            </intent-filter>
+        </service>
+        <!-- since 3.0.9 Required SDK 核心功能 -->
+        <provider
+            android:name="cn.jpush.android.service.DataProvider"
+            android:authorities="com.pet.DataProvider"
+            android:exported="false" />
+
+        <!-- since 3.1.0 Required SDK 核心功能 -->
+        <provider
+            android:name="cn.jpush.android.service.DownloadProvider"
+            android:authorities="com.pet.DownloadProvider"
+            android:exported="true" />
+        <!-- Required SDK核心功能 -->
+        <receiver
+            android:name="cn.jpush.android.service.PushReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter android:priority="1000">
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_RECEIVED_PROXY" /> <!-- Required  显示通知栏 -->
+                <category android:name="com.pet" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+            <!-- Optional -->
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Required SDK核心功能 -->
+        <receiver
+            android:name="cn.jpush.android.service.AlarmReceiver"
+            android:exported="false" />
+
+        <!-- User defined.  For test only  用户自定义接收消息器,3.0.7开始支持,目前新tag/alias接口设置结果会在该广播接收器对应的方法中回调 -->
+        <receiver android:name=".receiver.MyJPushMessageReceiver">
+            <intent-filter>
+                <action android:name="cn.jpush.android.intent.RECEIVE_MESSAGE" />
+
+                <category android:name="com.pet" />
+            </intent-filter>
+        </receiver>
+        <!-- Required  . Enable it you can get statistics data with channel -->
+        <meta-data
+            android:name="JPUSH_CHANNEL"
+            android:value="developer-default" />
+        <meta-data
+            android:name="JPUSH_APPKEY"
+            android:value="a3d1bad973276db7cee3f40a" />
+
+        <service
+            android:name=".service.LoginService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <!-- 填写约宠信息 -->
+        <activity
+            android:name=".activity.WalkDogInfoActivity"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- 获取用户位置的服务 -->
+        <service
+            android:name=".service.LocationService"
+            android:enabled="true"
+            android:exported="true" />
+        <!-- 消息管理界面 -->
+        <activity
+            android:name=".activity.MessageActivity"
+            android:screenOrientation="portrait" />
+
+        <!--拒绝约宠理由填写页面-->
+        <activity android:name=".activity.RefuseCallBackActivity" />
+
+        <!--仿微信图片查看器-->
+        <activity android:name=".activity.ImagePreviewActivity" />
+
+        <!--动态详情界面-->
+        <activity android:name=".activity.DynamicDetailActivity"
+            android:windowSoftInputMode="stateHidden"
             />
     </application>
 

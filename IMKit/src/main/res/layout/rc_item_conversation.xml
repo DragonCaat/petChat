@@ -23,8 +23,9 @@
             android:layout_gravity="center"
             android:background="@android:color/transparent"
             app:RCCornerRadius="3dp"
+            android:scaleType="centerCrop"
             app:RCDefDrawable="@drawable/rc_default_portrait"
-            app:RCShape="square" />
+            app:RCShape="circle" />
 
         <FrameLayout
             android:id="@+id/rc_unread_view_left"
@@ -69,6 +70,8 @@
             android:layout_gravity="center"
             android:background="@android:color/transparent"
             app:RCCornerRadius="3dp"
+            app:RCShape="circle"
+            android:scaleType="centerCrop"
             app:RCDefDrawable="@drawable/rc_default_portrait" />
 
         <FrameLayout

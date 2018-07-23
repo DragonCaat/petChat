@@ -134,7 +134,10 @@ public class PetManageActivity extends BaseActivity implements SwipeRefreshLayou
     public void onRefresh() {
         if (list == null)
             getData();
-        else
-            swipeRefreshLayout.setRefreshing(false);
+        else {
+            list.clear();
+            getData();
+        }
+
     }
 }

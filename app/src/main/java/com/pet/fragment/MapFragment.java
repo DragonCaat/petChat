@@ -13,15 +13,17 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
@@ -42,13 +44,23 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.model.animation.ScaleAnimation;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.geocoder.GeocodeResult;
+import com.amap.api.services.geocoder.GeocodeSearch;
+import com.amap.api.services.geocoder.RegeocodeAddress;
+import com.amap.api.services.geocoder.RegeocodeQuery;
+import com.amap.api.services.geocoder.RegeocodeResult;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.pet.R;
 import com.pet.activity.NearPeopleActivity;
+import com.pet.adapter.MapPetsAdapter;
 import com.pet.bean.Const;
+import com.pet.bean.MapPetInfo;
+import com.pet.bean.PetStoreEntity;
 import com.pet.bean.RangeEntity;
 import com.pet.bean.ResultEntity;
 import com.pet.retrofit.ApiService;
@@ -62,6 +74,7 @@ import com.pet.utils.RegionItem;
 import com.pet.view.NumberRollingView;
 import com.pet.view.PageIndicatorView;
 import com.pet.view.PageRecyclerView;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,10 +96,11 @@ import static android.content.Context.SENSOR_SERVICE;
  */
 
 public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedListener,
-        AMapLocationListener, LocationSource, SensorEventListener, ClusterRender, ClusterClickListener, PreferenceManager.OnActivityDestroyListener {
+        AMapLocationListener, LocationSource, SensorEventListener, ClusterRender, ClusterClickListener, PreferenceManager.OnActivityDestroyListener, GeocodeSearch.OnGeocodeSearchListener, AMap.OnMarkerClickListener {
 
     private int DOG_FLAG = 0;//遛狗的标示
     private int SAME_FLAG = 0;//同类宠物
+    private int PET_STORE_FLAG = 0;//宠物商店显示
 
     private MapView mMapView;
     private AMap mAmap;
@@ -109,27 +123,35 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
     @BindView(R.id.iv_same)
     ImageView mIvSame;
 
+    @BindView(R.id.loading)
+    AVLoadingIndicatorView loading;
+    @BindView(R.id.ll_loading)
+    LinearLayout llLoading;
+
+    @BindView(R.id.iv_pet_shop)
+    ImageView ivPetShop;
+
     private View mRoot;
 
     //聚合半径
-    private int clusterRadius = 8;
+    private int clusterRadius = 50;
     private ClusterOverlay mClusterOverlay;
-
-    private List<String> urls;
 
     private List<RangeEntity> rangeEntities;
     private List<ClusterItem> items;
     //纬度
-    private double latitude;
+    private double latitude = 0;
     //经度
-    private double longitude;
+    private double longitude = 0;
 
     private int user_id = 0;
-
     private String acces_token = "";
-
     private String phone = "";
 
+    private GeocodeSearch geocodeSearch;
+
+    //宠物商店集合
+    private List<PetStoreEntity> petStoreEntityList;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -150,8 +172,8 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
         phone = PreferencesUtils.getString(getActivity(), Const.MOBILE_PHONE);
 
         ButterKnife.bind(this, mRoot);
-
-
+        geocodeSearch = new GeocodeSearch(getActivity());
+        geocodeSearch.setOnGeocodeSearchListener(this);
         return mRoot;
     }
 
@@ -178,11 +200,13 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
             mSensor = mSM.getDefaultSensor(Sensor.TYPE_ORIENTATION);
             mSM.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);//注册回调函数
 
+            //marker点击事件的监听
+            mAmap.setOnMarkerClickListener(this);
 
         }
     }
 
-    @OnClick({R.id.iv_dog, R.id.iv_health, R.id.iv_foster_care, R.id.iv_near, R.id.iv_same, R.id.iv_location, R.id.iv_fresh})
+    @OnClick({R.id.iv_dog, R.id.iv_health, R.id.iv_foster_care, R.id.iv_near, R.id.iv_same, R.id.iv_location, R.id.iv_fresh, R.id.iv_pet_shop})
     public void onClick(View view) {
         switch (view.getId()) {
             //自身定位
@@ -221,27 +245,105 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
 
             //刷新附近的人
             case R.id.iv_fresh:
-                if (items != null)
-                    items.clear();
-                getRange();
+                llLoading.setVisibility(View.VISIBLE);
+                sleepNear();
 
                 break;
 
             //附近的人
             case R.id.iv_near:
-                Intent intent = new Intent(getActivity(), NearPeopleActivity.class);
-                intent.putExtra("long", longitude);
-                intent.putExtra("lat", latitude);
-                startActivity(intent);
+                if (longitude ==0||latitude == 0){
+                    Toast.makeText(getActivity(),"请先获取位置信息",Toast.LENGTH_SHORT).show();
+                }else {
+                    Intent intent = new Intent(getActivity(), NearPeopleActivity.class);
+                    intent.putExtra("long", longitude);
+                    intent.putExtra("lat", latitude);
+                    startActivity(intent);
+                }
+
+                break;
+
+            //宠物商店按钮
+            case R.id.iv_pet_shop:
+                if (PET_STORE_FLAG == 0) {
+                    llLoading.setVisibility(View.VISIBLE);
+                    sleepPetStore();
+                } else {
+                    clearMarkers();
+                }
+
+                break;
+
+            default:
 
                 break;
         }
+    }
+
+    //删除指定Marker
+    private void clearMarkers() {
+        //获取地图上所有Marker
+        List<Marker> mapScreenMarkers = mAmap.getMapScreenMarkers();
+        //动画
+        ScaleAnimation alphaAnimation = new ScaleAnimation(1.0f, 0.5f, 1.0f, 0.5f);
+        alphaAnimation.setDuration(500);
+        for (int i = 0; i < mapScreenMarkers.size(); i++) {
+            Marker marker = mapScreenMarkers.get(i);
+            if (marker.getObject() instanceof PetStoreEntity) {
+                marker.setAnimation(alphaAnimation);
+                marker.startAnimation();
+                marker.remove();//移除当前Marker
+            }
+        }
+        mMapView.invalidate();//刷新地图
+        ivPetShop.setImageResource(R.drawable.pet_shop);
+        PET_STORE_FLAG = 0;
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
+    }
+
+    private void sleepNear() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mClusterOverlay != null)
+                            mClusterOverlay.cleanAllMarkers();
+                        getRange();
+                    }
+                });
+            }
+        }.start();
+    }
+
+    private void sleepPetStore() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        GetDistanceInfos();
+                    }
+                });
+            }
+        }.start();
     }
 
     /**
@@ -366,7 +468,6 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
                 // 定位成功回调信息，设置相关消息
                 amapLocation.getLocationType();//获取当前定位结果来源，如网络定位结果,详见定位类型表
                 latitude = amapLocation.getLatitude();// 获取纬度
-
                 longitude = amapLocation.getLongitude();// 获取经度
 //                amapLocation.getAccuracy();// 获取精度信息
 //                SimpleDateFormat df = new SimpleDateFormat(
@@ -398,6 +499,11 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
      * 获取附近的人
      */
     private void getRange() {
+        if (longitude == 0 || latitude == 0) {
+            Toast.makeText(getActivity(), "请先获取定位", Toast.LENGTH_SHORT).show();
+            llLoading.setVisibility(View.INVISIBLE);
+            return;
+        }
         ApiService api = RetrofitClient.getInstance(getActivity()).Api();
         Map<String, Object> params = new HashMap<>();
         params.put("latitude", latitude);
@@ -419,14 +525,15 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
                 ResultEntity result = response.body();
                 int res = result.getCode();
                 if (res == 200) {// 获取成功
-
                     rangeEntities = JSON.parseArray(result.getData().toString(), RangeEntity.class);
                     if (rangeEntities != null && rangeEntities.size() > 0)
                         //addMarkers(rangeEntities);
                         initData(rangeEntities);
+                    llLoading.setVisibility(View.GONE);
 
                 } else {
-
+                    llLoading.setVisibility(View.GONE);
+                    Toast.makeText(getActivity(), "暂无附近宠物信息", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -447,16 +554,18 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
             lat = rangeEntity.getLoc().getCoordinates().get(1);
             lon = rangeEntity.getLoc().getCoordinates().get(0);
             String petIcon = Const.PIC_URL + rangeEntity.getPet_info().getPet_icon();
+
+            String userId = rangeEntity.getUser_id();
+
             LatLng latLng = new LatLng(lat, lon, false);
             RegionItem regionItem = new RegionItem(latLng,
-                    "pet", petIcon);
+                    "pet", petIcon, userId);
             items.add(regionItem);
-
         }
         //构造方法引入markers数据
         mClusterOverlay = new ClusterOverlay(mAmap, items,
                 dp2px(getContext(), clusterRadius),
-                getContext());
+                getActivity());
         mClusterOverlay.setClusterRenderer(MapFragment.this);
         mClusterOverlay.setOnClusterClickListener(MapFragment.this);
 
@@ -527,68 +636,12 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
     }
 
 
-    /**
-     * by moos on 2017/11/13
-     * func:定制化marker的图标
-     *
-     * @return
-     */
-    private void customizeMarkerIcon(String url, final OnMarkerIconLoadListener listener) {
-        final View markerView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_marker_item, null);
-        final CircleImageView icon = markerView.findViewById(R.id.pet_photo);
-
-        Glide.with(this)
-                .load(url)
-                .asBitmap()
-                .thumbnail(0.2f)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .centerCrop()
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
-                        //待图片加载完毕后再设置bitmapDes
-                        icon.setImageBitmap(bitmap);
-                        bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(convertViewToBitmap(markerView));
-                        listener.markerIconLoadingFinished(markerView);
-                    }
-                });
-
-    }
-
-
-    /**
-     * func:添加marker到地图上显示
-     */
-    BitmapDescriptor bitmapDescriptor;
-
-    //往地图上添加markers
-    private void addMarker(RangeEntity rangeEntity) {
-        double lat;
-        double lon;
-        lat = rangeEntity.getLoc().getCoordinates().get(1);
-        lon = rangeEntity.getLoc().getCoordinates().get(0);
-
-        String url = Const.PIC_URL + rangeEntity.getPet_info().getPet_icon();
-
-        final MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.setFlat(true);
-        markerOptions.anchor(0.5f, 0.5f);
-        markerOptions.position(new LatLng(lat, lon));
-        customizeMarkerIcon(url, new OnMarkerIconLoadListener() {
-            @Override
-            public void markerIconLoadingFinished(View view) {
-                markerOptions.icon(bitmapDescriptor);
-                mAmap.addMarker(markerOptions);
-            }
-        });
-
-    }
-
     @Override
-    public Bitmap getDrawAble(int clusterNum) {
+    public View getDrawAble(int clusterNum) {
         final View markerView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_marker_item, null);
-        Bitmap bitmap = convertViewToBitmap(markerView);
-        return bitmap;
+        // Bitmap bitmap = convertViewToBitmap(markerView);
+        return markerView;
+
     }
 
     @Override
@@ -600,10 +653,73 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
 //        LatLngBounds latLngBounds = builder.build();
 //        mAmap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 0)
 //        );
-        if (clusterItems.size() == 1)
-            Toast.makeText(getActivity(), "" + clusterItems.get(0).getUrl(), Toast.LENGTH_SHORT).show();
+        if (clusterItems.size() == 1) {
+            double latitude = clusterItems.get(0).getPosition().latitude;
+            double longitude = clusterItems.get(0).getPosition().longitude;
+            //被点击用户的id
+            String userId = clusterItems.get(0).getUserId();
+            llLoading.setVisibility(View.VISIBLE);
+            sleep(latitude, longitude, userId);
+        } else {
+            //展示popWindow
+            List<String> list = new ArrayList<>();
+            for (int i = 0; i < clusterItems.size(); i++) {
+                list.add(clusterItems.get(i).getUrl());
+            }
+            showMapPetsWindow(list, clusterItems);
+        }
+    }
 
-        initPopupWindow();
+    //点击多个聚合数据时候展示的POP window
+    private void showMapPetsWindow(List<String> list, final List<ClusterItem> clusterItems) {
+        View popView = getLayoutInflater().inflate(R.layout.layout_show_pets_item, null);
+        ListView listView = popView.findViewById(R.id.lv_pets);
+
+        final PopupWindow popupWindow = new PopupWindow(popView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        MapPetsAdapter adapter = new MapPetsAdapter(list, getActivity());
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                llLoading.setVisibility(View.VISIBLE);
+                sleep(clusterItems.get(i).getPosition().latitude, clusterItems.get(i).getPosition().longitude, clusterItems.get(i).getUserId());
+
+                getAddressByLatlng(clusterItems.get(i).getPosition());
+
+                popupWindow.dismiss();
+            }
+        });
+        popupWindow.setFocusable(true);
+        popupWindow.setBackgroundDrawable(new BitmapDrawable());
+        popupWindow.setOutsideTouchable(true);
+        int width = getActivity().getWindowManager().getDefaultDisplay().getWidth();
+        popupWindow.setWidth(width * 20 / 30);
+
+        popupWindow.showAtLocation(popView, Gravity.CENTER, 0, 0);
+        //popupWindow.showAsDropDown(marker);
+    }
+
+    //系统休眠500
+    private void sleep(final double latitude, final double longitude, final String userId) {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    sleep(600);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        getPetInfo(latitude, longitude, userId);
+                    }
+                });
+            }
+        }.start();
     }
 
 
@@ -612,6 +728,28 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
     public void onActivityDestroy() {
 
     }
+
+    private void getAddressByLatlng(LatLng latLng) {
+        //逆地理编码查询条件：逆地理编码查询的地理坐标点、查询范围、坐标类型。
+        LatLonPoint latLonPoint = new LatLonPoint(latLng.latitude, latLng.longitude);
+        RegeocodeQuery query = new RegeocodeQuery(latLonPoint, 20f, GeocodeSearch.AMAP);
+        //异步查询
+        geocodeSearch.getFromLocationAsyn(query);
+    }
+
+    //搜索实现方法
+    @Override
+    public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int i) {
+        RegeocodeAddress regeocodeAddress = regeocodeResult.getRegeocodeAddress();
+        String formatAddress = regeocodeAddress.getFormatAddress();
+        String simpleAddress = formatAddress.substring(9);
+        //String simpleAddress1 = formatAddress.substring(13);
+    }
+
+    @Override
+    public void onGeocodeSearched(GeocodeResult geocodeResult, int i) {
+    }
+
 
     /**
      * func:自定义监听接口,用来marker的icon加载完毕后回调添加marker属性
@@ -628,33 +766,21 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
         view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
 
         view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
-
         view.buildDrawingCache();
-
         Bitmap bitmap = view.getDrawingCache();
 
         return bitmap;
 
     }
 
-    private void addMarkers(List<RangeEntity> rangeEntities) {
-        //在地图上添加其他的markers
-        for (int i = 0; i < rangeEntities.size(); i++) {
-            addMarker(rangeEntities.get(i));
-        }
-    }
-
     /**
      * 初始化popupWindow
+     *
+     * @param pet_info 宠物信息
+     * @param distance 半径
      */
-    private void initPopupWindow() {
-        List<String> list_tequan1 = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            list_tequan1.add("堂吉诃德" + i);
-        }
-
+    private void initPopupWindow(List<MapPetInfo.PetInfoBean> pet_info, double distance) {
         View popView = getLayoutInflater().inflate(R.layout.popwindow_item, null);
-
         PageRecyclerView mRecyclerView = popView.findViewById(R.id.cusom_swipe_view);
         // 设置指示器
         mRecyclerView.setIndicator((PageIndicatorView) popView.findViewById(R.id.indicator));
@@ -663,7 +789,7 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
         // 设置页间距
         mRecyclerView.setPageMargin(0);
         // 设置数据
-        mRecyclerView.setAdapter(mRecyclerView.new PageAdapter(list_tequan1, getActivity()));
+        mRecyclerView.setAdapter(mRecyclerView.new PageAdapter(pet_info, getActivity(), distance));
 
         PopupWindow popupWindow = new PopupWindow(popView,
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -675,6 +801,207 @@ public class MapFragment extends SupportMapFragment implements AMap.OnMapLoadedL
         popupWindow.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
         int height = getActivity().getWindowManager().getDefaultDisplay().getHeight();
         popupWindow.setHeight(height * 10 / 20);
+
         popupWindow.showAtLocation(popView, Gravity.BOTTOM, 0, 0);
+    }
+
+    //获取用户的宠物信息
+    private void getPetInfo(double latitude_, double longitude_, String userId_) {
+        ApiService api = RetrofitClient.getInstance(getActivity()).Api();
+        Map<String, Object> params = new HashMap<>();
+        params.put("fP1Lat", latitude);
+        params.put("fP1Lon", longitude);
+        params.put("fP2Lat", latitude_);
+        params.put("fP2Lon", longitude_);
+        params.put("user_id", userId_);
+        params.put("access_token", acces_token);
+        params.put("mobilephone", phone);
+
+        Call<ResultEntity> call = api.getPetInfo(params);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 获取成功
+                    MapPetInfo petInfo = JSON.parseObject(result.getData().toString(), MapPetInfo.class);
+                    if (petInfo != null) {
+                        List<MapPetInfo.PetInfoBean> pet_info = petInfo.getPet_info();
+                        double distance = petInfo.getDistance();
+                        llLoading.setVisibility(View.GONE);
+                        initPopupWindow(pet_info, distance);
+                    }
+                } else {
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> arg0, Throwable arg1) {
+
+            }
+        });
+    }
+
+    /**
+     * 获取附近的宠物店信息
+     */
+    private void GetDistanceInfos() {
+        if (longitude == 0 || latitude == 0) {
+            Toast.makeText(getActivity(), "请先获取定位", Toast.LENGTH_SHORT).show();
+            llLoading.setVisibility(View.INVISIBLE);
+            return;
+        }
+        ApiService api = RetrofitClient.getInstance(getActivity()).Api();
+        Map<String, Object> params = new HashMap<>();
+        params.put("latitude", latitude);
+        params.put("longitude", longitude);
+        //params.put("distance", 50);
+        params.put("user_id", user_id);
+        params.put("access_token", acces_token);
+        params.put("mobilephone", phone);
+
+        Call<ResultEntity> call = api.GetDistanceInfos(params);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 获取成功
+
+                    petStoreEntityList = JSON.parseArray(result.getData().toString(), PetStoreEntity.class);
+
+                    if (petStoreEntityList.size() > 0) {
+                        addMarkers(petStoreEntityList);
+                    } else {
+
+                    }
+                    //改变按钮状态
+                    PET_STORE_FLAG = 1;
+                    ivPetShop.setImageResource(R.drawable.pet_shop_press);
+                    llLoading.setVisibility(View.GONE);
+
+                } else {
+                    llLoading.setVisibility(View.GONE);
+                    Toast.makeText(getActivity(), "暂无附近宠物店信息", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> arg0, Throwable arg1) {
+
+            }
+        });
+    }
+
+
+    private void addMarkers(List<PetStoreEntity> petStoreEntityList) {
+        //在地图上添加其他的markers
+        for (PetStoreEntity petStoreEntity : petStoreEntityList) {
+            addMarker(petStoreEntity);
+        }
+    }
+
+    /**
+     * by moos on 2017/11/13
+     * func:定制化marker的图标
+     *
+     * @return
+     */
+    private void customizeMarkerIcon(String url, final OnMarkerIconLoadListener listener) {
+        final View markerView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_pet_store_item, null);
+        final CircleImageView icon = markerView.findViewById(R.id.pet_photo);
+        Glide.with(this)
+                .load(url)
+                .asBitmap()
+                .thumbnail(0.2f)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .centerCrop()
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
+                        //待图片加载完毕后再设置bitmapDes
+                        icon.setImageBitmap(bitmap);
+                        bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(convertViewToBitmap(markerView));
+                        listener.markerIconLoadingFinished(markerView);
+                    }
+                });
+
+        markerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getActivity(), "hello", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+
+    /**
+     * func:添加marker到地图上显示
+     */
+    BitmapDescriptor bitmapDescriptor;
+
+    //往地图上添加markers
+    private void addMarker(final PetStoreEntity petStoreEntity) {
+        double lat;
+        double lon;
+        lat = Double.parseDouble(petStoreEntity.getLatitude());
+        lon = Double.parseDouble(petStoreEntity.getLongitude());
+        String url = Const.PIC_URL + petStoreEntity.getShop_avatar();
+
+        final MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.setFlat(true);
+        markerOptions.anchor(0.5f, 0.5f);
+        markerOptions.position(new LatLng(lat, lon));
+        //动画
+        final ScaleAnimation alphaAnimation = new ScaleAnimation(0.5f, 1.0f, 0.5f, 1.0f);
+        alphaAnimation.setDuration(500);
+
+//        View markerView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_pet_store_item, null);
+//        bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(convertViewToBitmap(markerView));
+//        markerOptions.icon(bitmapDescriptor);
+//        Marker marker = mAmap.addMarker(markerOptions);
+//        marker.setAnimation(alphaAnimation);
+//        marker.startAnimation();
+//        //这行关键，标记Marker的类型宠物商店类型
+//        marker.setObject(petStoreEntity);
+
+        customizeMarkerIcon(url, new OnMarkerIconLoadListener() {
+            @Override
+            public void markerIconLoadingFinished(View view) {
+                markerOptions.icon(bitmapDescriptor);
+                Marker marker = mAmap.addMarker(markerOptions);
+                marker.setAnimation(alphaAnimation);
+                marker.startAnimation();
+                //这行关键，标记Marker的类型宠物商店类型
+                marker.setObject(petStoreEntity);
+
+
+            }
+        });
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        Log.i("hello", "onMarkerClick: 呵呵哒");
+
+        for (int i = 0; i < petStoreEntityList.size(); i++) {
+            if (marker.getObject() instanceof PetStoreEntity) {
+                Toast.makeText(getActivity(), "hello", Toast.LENGTH_SHORT).show();
+            }
+        }
+        return false;
     }
 }

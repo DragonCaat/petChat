@@ -26,5 +26,17 @@ public class Const {
     public static String USER_ID = "user_id";
 
     //融云token
-    public static String RC_TOKEN = "access_token";
+    public static String RC_TOKEN = "rc_token";
+
+    //用户第一次试用标志
+    public static String FIRST_GUIDE = "first_guide";
+
+    //极光id
+    public static String REGID = "regId";
+
+    //是否在地图上显示宠物
+    public static String LOCATION_FLAG = "location_flag";
+
+    //是否接受约宠
+    public static String APPOINT_FLAG = "appoint_flag";
 }

@@ -1,6 +1,7 @@
 package com.pet.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -20,16 +21,23 @@ import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.geocoder.GeocodeResult;
+import com.amap.api.services.geocoder.GeocodeSearch;
+import com.amap.api.services.geocoder.RegeocodeAddress;
+import com.amap.api.services.geocoder.RegeocodeQuery;
+import com.amap.api.services.geocoder.RegeocodeResult;
 import com.pet.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * 发布动态或者随手拍获取用户位置的activity
  */
 
-public class GetLocationActivity extends AppCompatActivity implements AMap.OnCameraChangeListener, LocationSource, AMapLocationListener {
+public class GetLocationActivity extends AppCompatActivity implements AMap.OnCameraChangeListener, LocationSource, AMapLocationListener, GeocodeSearch.OnGeocodeSearchListener {
 
     private MapView mMapView;
     private AMap mAmap;
@@ -45,6 +53,12 @@ public class GetLocationActivity extends AppCompatActivity implements AMap.OnCam
 
     private boolean FIRST_LOCATION = true;
 
+    private String locationAddress = "";
+    private double latitude = 0;
+    private double longitude = 0;
+
+    private GeocodeSearch geocodeSearch;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +67,19 @@ public class GetLocationActivity extends AppCompatActivity implements AMap.OnCam
         mMapView = findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
         initMap();
+
+        geocodeSearch = new GeocodeSearch(this);
+        geocodeSearch.setOnGeocodeSearchListener(this);
+    }
+
+    @OnClick(R.id.btn_sure)
+    public void onClick() {
+        Intent intent = new Intent();
+        intent.putExtra("location",locationAddress);
+        intent.putExtra("latitude",latitude);
+        intent.putExtra("longitude",longitude);
+        setResult(PublishActivity.GET_LOCATION,intent);
+        finish();
     }
 
     private void initMap() {
@@ -92,8 +119,14 @@ public class GetLocationActivity extends AppCompatActivity implements AMap.OnCam
      */
     @Override
     public void onCameraChangeFinish(CameraPosition position) {
-        LatLng finishTarget = position.target;
-
+        LatLng latLng = position.target;
+        latitude = latLng.latitude;
+        longitude = latLng.longitude;
+        //逆地理编码查询条件：逆地理编码查询的地理坐标点、查询范围、坐标类型。
+        LatLonPoint latLonPoint = new LatLonPoint(latitude, longitude);
+        RegeocodeQuery query = new RegeocodeQuery(latLonPoint, 50f, GeocodeSearch.AMAP);
+        //异步查询
+        geocodeSearch.getFromLocationAsyn(query);
 
     }
 
@@ -200,5 +233,22 @@ public class GetLocationActivity extends AppCompatActivity implements AMap.OnCam
         super.onSaveInstanceState(outState);
         //在activity执行onSaveInstanceState时执行mMapView.onSaveInstanceState (outState)，实现地图生命周期管理
         mMapView.onSaveInstanceState(outState);
+    }
+
+    //经纬度和位置转换
+    @Override
+    public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int i) {
+        RegeocodeAddress regeocodeAddress = regeocodeResult.getRegeocodeAddress();
+        String formatAddress = regeocodeAddress.getFormatAddress();
+        locationAddress = formatAddress.substring(9);
+        //String simpleAddress1 = formatAddress.substring(13);
+
+        tvLocation.setText(locationAddress);
+
+    }
+
+    @Override
+    public void onGeocodeSearched(GeocodeResult geocodeResult, int i) {
+
     }
 }

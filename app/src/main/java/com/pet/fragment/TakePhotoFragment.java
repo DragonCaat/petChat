@@ -116,8 +116,8 @@ public class TakePhotoFragment extends Fragment implements SwipeRefreshLayout.On
                         setData(takePhotoEntities);
                     }
                     mSwipeRefreshLayout.setRefreshing(false);
-                }else
-                    Toast.makeText(getActivity(),""+result.getMessage(),Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(getActivity(), "" + result.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -139,8 +139,10 @@ public class TakePhotoFragment extends Fragment implements SwipeRefreshLayout.On
     public void onRefresh() {
         if (takePhotoEntities == null)
             getTakePhotoData();
-        else
-            mSwipeRefreshLayout.setRefreshing(false);
+        else {
+            takePhotoEntities = null;
+            getTakePhotoData();
+        }
 
     }
 }

@@ -1,5 +1,6 @@
 package com.pet.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -44,6 +46,7 @@ import retrofit2.Response;
  * 萌宠的fragment
  */
 
+@SuppressLint("ValidFragment")
 public class CutePetFragment extends Fragment {
 
     private View mRoot;
@@ -53,6 +56,8 @@ public class CutePetFragment extends Fragment {
     @BindView(R.id.ll_no_pet)
     LinearLayout mLlNoPet;
 
+    @BindView(R.id.btn_add_pet)
+    Button btnAdd;
 
     private List<CutePetEntity> list;
     private CutePetAdapter adapter;
@@ -69,15 +74,29 @@ public class CutePetFragment extends Fragment {
 
     private Context mContext;
 
+
+    @SuppressLint("ValidFragment")
+    public CutePetFragment(int user_id_) {
+        this.user_id = user_id_;
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mRoot = inflater.inflate(R.layout.fragment_cute_pet, container,
                 false);
-        user_id = PreferencesUtils.getInt(getActivity(), Const.USER_ID, 0);
+        if (user_id == 0)
+            user_id = PreferencesUtils.getInt(getActivity(), Const.USER_ID, 0);
         acces_token = PreferencesUtils.getString(getActivity(), Const.ACCESS_TOKEN);
         phone = PreferencesUtils.getString(getActivity(), Const.MOBILE_PHONE);
         ButterKnife.bind(this, mRoot);
+
+        if (user_id == 0)
+            btnAdd.setVisibility(View.GONE);
+        else
+            btnAdd.setVisibility(View.VISIBLE);
+        isFirst = true;
         mContext = getActivity();
         initData();
         getData();
@@ -85,12 +104,11 @@ public class CutePetFragment extends Fragment {
     }
 
     @OnClick(R.id.btn_add_pet)
-    public void onClick(){
+    public void onClick() {
         //添加宠物
         Intent intent = new Intent(mContext, AddPetActivity.class);
         startActivity(intent);
     }
-
 
 
     private void initData() {
@@ -100,8 +118,12 @@ public class CutePetFragment extends Fragment {
                 //刷新
                 if (list == null)
                     getData();
-                else
-                    xRecyclerView.refreshComlete();
+                else {
+                    list = null;
+                    pageno = 0;
+                    isFirst = true;
+                    getData();
+                }
             }
 
             @Override
@@ -110,6 +132,8 @@ public class CutePetFragment extends Fragment {
                 if (!noData) {
                     pageno++;
                     getData();
+                } else {
+                    xRecyclerView.refreshComlete();
                 }
 
             }
@@ -140,7 +164,7 @@ public class CutePetFragment extends Fragment {
                         isFirst = false;
                         list = JSON.parseArray(result.getData().toString(), CutePetEntity.class);
                         if (list != null && list.size() > 0) {
-                            adapter = new CutePetAdapter( mContext,list);
+                            adapter = new CutePetAdapter(getActivity(), list);
                             mLlNoPet.setVisibility(View.GONE);
                         } else {
                             mLlNoPet.setVisibility(View.VISIBLE);

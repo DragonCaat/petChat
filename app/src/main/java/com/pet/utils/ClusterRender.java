@@ -1,6 +1,6 @@
 package com.pet.utils;
 
-import android.graphics.Bitmap;
+import android.view.View;
 
 /**
  * Created by dragon on 18/6/10.
@@ -13,5 +13,5 @@ public interface ClusterRender {
      * @param clusterNum
      * @return
      */
-     Bitmap getDrawAble(int clusterNum);
+     View getDrawAble(int clusterNum);
 }

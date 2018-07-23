@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +13,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.pet.R;
 import com.pet.activity.TakePhotoDetailActivity;
-import com.pet.bean.NineGridTestModel;
 import com.pet.bean.TakePhotoEntity;
-import com.pet.view.NineGridTestLayout;
 
 import java.util.List;
 

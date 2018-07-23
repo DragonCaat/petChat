@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="65dp"
+    android:gravity="center">
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/head"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="6dp"
+        android:src="@mipmap/default_head" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@+id/head"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="大发明家:约宠申请"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_marginTop="2dp"
+            android:textColor="@color/gray"
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="向你申请约宠 2018-07-13"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_appoint"
+        android:layout_marginEnd="10dp"
+        android:layout_width="60dp"
+        android:layout_height="25dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
+        android:background="@drawable/button_selector"
+        android:text="详情"
+        android:textColor="@color/black" />
+
+    <View
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_" />
+
+</RelativeLayout>

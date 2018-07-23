@@ -12,7 +12,10 @@ import com.mob.MobSDK;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import cn.jpush.android.api.JPushInterface;
 import io.rong.imkit.RongIM;
+import io.rong.imlib.RongIMClient;
+import io.rong.imlib.model.Message;
 
 /**
  * Created by dragon on 2018/6/13.
@@ -35,6 +38,10 @@ public class MyApplication extends MultiDexApplication {
         Fresco.initialize(getApplicationContext());
 
         initCamera();
+
+        //极光推送初始化
+        JPushInterface.setDebugMode(true); 	// 设置开启日志,发布时请关闭日志
+        JPushInterface.init(this);     	// 初始化 JPush
     }
 
     private void initImageLoader() {
@@ -74,5 +81,4 @@ public class MyApplication extends MultiDexApplication {
         }
         return null;
     }
-
 }

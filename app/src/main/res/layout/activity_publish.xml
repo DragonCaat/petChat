@@ -88,6 +88,7 @@
                     android:background="@mipmap/home_location_press" />
 
                 <TextView
+                    android:id="@+id/tv_show_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="2dp"

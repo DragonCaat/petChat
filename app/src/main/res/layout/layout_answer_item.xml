@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
-    android:layout_marginBottom="10dp"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
     android:orientation="horizontal">
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -33,9 +34,8 @@
 
             <TextView
                 android:id="@+id/tv_content"
-                android:text="少年英雄九四小哪吒,我只是个送外卖的。有句话不知当讲不当讲"
                 android:layout_marginStart="4dp"
-                android:layout_toRightOf="@+id/tv_answer_name"
+                android:layout_toEndOf="@+id/tv_answer_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -54,6 +54,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/ll_point"
         android:gravity="center"
         android:layout_gravity="center"
         android:orientation="horizontal"
@@ -61,18 +62,22 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:id="@+id/iv_point"
             android:layout_gravity="center"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="30dp"
+            android:padding="8dp"
+            android:scaleType="center"
+            android:layout_height="30dp"
             android:src="@mipmap/hand" />
 
         <TextView
-            android:layout_marginStart="4dp"
+            android:id="@+id/tv_point"
             android:text="3"
+            android:gravity="center"
             android:textColor="@color/gray"
             android:textSize="16sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="25dp"
+            android:layout_height="25dp" />
     </LinearLayout>
 
 </LinearLayout>

@@ -5,6 +5,8 @@
     <color name="colorAccent">#FF4081</color>
     <color name="white">#ffffff</color>
 
+    <color name="purple">#E066FF</color>
+
     <color name="main_color_black">#4b4b4b</color>
     <color name="main_color_press">#fed943</color>
 
@@ -12,6 +14,10 @@
     <color name="green">#5BC4ED</color>
     <color name="black">#4d4d4d</color>
     <color name="gray">#d3d3d3</color>
+
+
+    <color name="gray1">#e3e3e3</color>
+
 
     <color name="hint_color">#bcbcbc</color>
 
@@ -24,4 +30,9 @@
     <color name="gray_answer">#f4f4f4</color>
 
     <color name="transparent">#00000000</color>
+
+    <color name="white_half_transparent">#80ffffff</color>
+
+    <color name="half_transparent">#80000000</color>
+
 </resources>

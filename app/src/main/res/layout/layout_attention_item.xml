@@ -1,156 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="10dp"
-    android:layout_marginStart="10dp"
     android:background="@color/white"
-    android:layout_marginTop="6dp"
-    android:orientation="horizontal">
-
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/circleImage_user"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@mipmap/photo" />
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tv_nickName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="达西总监"
-            android:textColor="@color/blue"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
 
 
-        <TextView
-            android:id="@+id/tv_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:gravity="left"
-            android:maxLines="4"
-            android:text="嗯"
-            android:textSize="14sp" />
-
-
-        <com.pet.view.NineGridTestLayout
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/images"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-
-            app:sapcing="4dp" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp">
-
-            <TextView
-                android:id="@+id/tv_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@mipmap/time"
-                android:drawablePadding="4dp"
-                android:text="昨天 9:49" />
-
-            <LinearLayout
-                android:layout_marginEnd="20dp"
-                android:layout_toLeftOf="@+id/ll_answer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/iv_point"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:scaleType="center"
-                    android:src="@mipmap/point" />
-
-                <TextView
-                    android:layout_marginStart="2dp"
-                    android:textSize="14sp"
-                    android:id="@+id/tv_point"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="20" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/ll_answer"
-                android:layout_alignParentEnd="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/iv_answer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:scaleType="center"
-                    android:src="@mipmap/answer" />
-
-                <TextView
-                    android:textSize="14sp"
-                    android:layout_marginStart="2dp"
-                    android:id="@+id/tv_answer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="20" />
-            </LinearLayout>
-
-
-        </RelativeLayout>
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/circleImage_user"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@mipmap/photo" />
 
         <LinearLayout
-            android:background="@color/gray_answer"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:textColor="@color/blue"
-                android:layout_marginStart="2dp"
-                android:id="@+id/tv_answer_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="服务器研发总监: " />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tv_nickName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:text="达西总监"
+                    android:textColor="@color/blue"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/iv_reward"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:padding="12dp"
+                    android:scaleType="fitXY"
+                    android:src="@mipmap/reward" />
+
+            </RelativeLayout>
 
             <TextView
-                android:singleLine="true"
-                android:textColor="@color/black"
-                android:layout_marginStart="2dp"
-                android:id="@+id/tv_answer_content"
-                android:layout_width="wrap_content"
+                android:id="@+id/tv_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="科学的甜美气息" />
+                android:layout_marginTop="2dp"
+                android:gravity="left"
+                android:maxLines="4"
+                android:text="嗯"
+                android:textSize="14sp" />
+
+            <com.pet.ninelayout.NineGridTestLayout
+                android:id="@+id/images"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:oneImageHeight="320dp"
+                app:oneImageWidth="250dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@mipmap/time" />
+
+                    <TextView
+                        android:id="@+id/tv_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="昨天 9:49" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@id/ll_point"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:layout_toStartOf="@+id/ll_answer"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/iv_point"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:scaleType="center"
+                        android:src="@mipmap/point" />
+
+                    <TextView
+                        android:id="@+id/tv_point"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        android:text="20"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_answer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/iv_answer"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:scaleType="center"
+                        android:src="@mipmap/answer" />
+
+                    <TextView
+                        android:id="@+id/tv_answer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        android:text="20"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_answer_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/gray_answer"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_answer_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        android:text="服务器研发总监: "
+                        android:textColor="@color/blue" />
+
+                    <TextView
+                        android:id="@+id/tv_answer_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        android:singleLine="true"
+                        android:text="科学的甜美气息"
+                        android:textColor="@color/black" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_answer_counet"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:background="@color/gray_answer"
+                    android:gravity="center|left"
+                    android:text="共100条回复 >"
+                    android:textColor="@color/blue" />
+            </LinearLayout>
 
         </LinearLayout>
-        <TextView
-            android:gravity="center|left"
-            android:background="@color/gray_answer"
-            android:textColor="@color/blue"
-            android:text="共100条回复 >"
-            android:layout_width="match_parent"
-            android:layout_height="30dp" />
-
-
     </LinearLayout>
 
-
+    <View
+        android:layout_marginTop="10dp"
+        android:background="@color/gray_"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
 </LinearLayout>
 
 

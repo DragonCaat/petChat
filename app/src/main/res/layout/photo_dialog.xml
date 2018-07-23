@@ -31,6 +31,7 @@
     </LinearLayout>
 
     <ImageView
+        android:visibility="gone"
         android:scaleType="fitXY"
         android:layout_marginTop="10dp"
         android:id="@+id/iv_cancle"

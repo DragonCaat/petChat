@@ -1,24 +1,22 @@
 package com.pet.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.pet.R;
+import com.pet.activity.DynamicDetailActivity;
 import com.pet.bean.AttentionEntity;
 import com.pet.bean.Const;
-import com.pet.bean.NineGridTestModel;
-import com.pet.view.NineGridTestLayout;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,12 +45,16 @@ public class AttentionAdapter extends RecyclerView.Adapter<AttentionAdapter.View
         TextView tvTime;
         ImageView imageView;
 
+        LinearLayout linearLayout;
+
         public ViewHolder(View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.tv);
             tvImageNum = itemView.findViewById(R.id.tv_pic_number);
             tvTime = itemView.findViewById(R.id.tv_time);
             imageView = itemView.findViewById(R.id.iv_image);
+
+            linearLayout = itemView.findViewById(R.id.ll_attention_item);
         }
     }
 
@@ -63,18 +65,31 @@ public class AttentionAdapter extends RecyclerView.Adapter<AttentionAdapter.View
 
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         // 如果是正常的item，直接设置TextView的值
-        AttentionEntity entity = list.get(position);
+        final AttentionEntity entity = list.get(position);
         holder.textView.setText(entity.getContent());
         holder.tvImageNum.setText("共 " + entity.getImgs().size() + "张");
         holder.tvTime.setText(entity.getSend_time());
-        if (entity.getImgs().size() > 0)
+        if (entity.getImgs().size() > 0){
             Glide.with(context)
                     .load(Const.PIC_URL + entity.getImgs().get(0))
+                    .dontAnimate()
                     .placeholder(R.mipmap.take_photo_loading)
                     .into(holder.imageView);
+        }
+
+        holder.linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, DynamicDetailActivity.class);
+                intent.putExtra("DynamicId",entity.getDynamic_id());
+                intent.putExtra("flag",0);//是否是自己的动态判断1：不是自己 0：自己的动态
+                context.startActivity(intent);
+            }
+        });
     }
 
 }

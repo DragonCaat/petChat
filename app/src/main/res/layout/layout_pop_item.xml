@@ -1,33 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@android:color/transparent"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:orientation="horizontal">
 
     <LinearLayout
-        android:gravity="center"
-        android:orientation="vertical"
-        android:background="@mipmap/pet_bone_bg"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@mipmap/pet_bone_bg"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-        <TextView
-            android:drawablePadding="6dp"
-            android:drawableStart="@mipmap/pet_food"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:text="狗粮 x3"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:layout_marginTop="8dp"
-            android:drawablePadding="6dp"
-            android:drawableStart="@mipmap/pet_ticket"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:text="粮票 x2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:gravity="center|left"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/tv_food"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="2dp"
+                android:drawableStart="@mipmap/pet_food"
+                android:text="狗粮 x3"
+                android:textColor="@color/black"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_marginTop="4dp"
+                android:background="@color/gray_"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"/>
+
+            <TextView
+                android:id="@+id/tv_ticket"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawablePadding="2dp"
+                android:drawableStart="@mipmap/pet_ticket"
+                android:text="粮票 x2"
+                android:textColor="@color/black"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginStart="4dp"
+            android:layout_width="14dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="@drawable/shape_corner_normal" >
+
+            <TextView
+                android:textSize="10sp"
+                android:layout_gravity="center|top"
+                android:text="兑"
+                android:textColor="@color/white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <View
+                android:layout_marginTop="6dp"
+                android:background="@color/white"
+                android:layout_width="8dp"
+                android:layout_height="1dp"/>
+
+            <TextView
+                android:textSize="10sp"
+                android:layout_marginTop="6dp"
+                android:layout_gravity="center|top"
+                android:text="换"
+                android:textColor="@color/white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -99,19 +99,24 @@ public class NearPeopleActivity extends AppCompatActivity {
                 //刷新
                 if (list == null)
                     getData();
-                else
-                    xRecyclerView.refreshComlete();
+                else {
+                    list = null;
+                    pageno = 0;
+                    isFirst = true;
+                    getData();
+                }
+
             }
 
             @Override
             public void onLoadMore() {
                 //加载更多
-                if (!noData){
+                if (!noData) {
                     pageno++;
                     getData();
-                }else {
+                } else {
                     xRecyclerView.refreshComlete();
-                    Toast.makeText(mContext,"说了没数据",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(mContext,"说了没数据",Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -119,6 +124,7 @@ public class NearPeopleActivity extends AppCompatActivity {
 
     //获取附近的人信息
     private void getData() {
+        //xRecyclerView.setRefreshing(true);
         ApiService api = RetrofitClient.getInstance(this).Api();
         Map<String, Object> params = new HashMap<>();
         params.put("user_id", user_id);
@@ -140,6 +146,7 @@ public class NearPeopleActivity extends AppCompatActivity {
                 ResultEntity result = response.body();
                 int res = result.getCode();
                 if (res == 200) {// 获取成功
+                    //xRecyclerView.setRefreshing(false);
                     if (isFirst) {
                         isFirst = false;
                         list = JSON.parseArray(result.getData().toString(), NearByEntity.class);
@@ -152,10 +159,10 @@ public class NearPeopleActivity extends AppCompatActivity {
 
                             adapter.notifyDataSetChanged();
                             xRecyclerView.refreshComlete();
-                        }else {
+                        } else {
                             xRecyclerView.refreshComlete();
                             noData = true;
-                            Toast.makeText(mContext,"没数据了",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "没数据了", Toast.LENGTH_SHORT).show();
                         }
                     }
                     xRecyclerView.verticalLayoutManager().setAdapter(adapter);

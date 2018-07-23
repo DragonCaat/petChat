@@ -65,6 +65,14 @@
         <item name="android:windowExitAnimation">@anim/push_buttom_out</item>
     </style>
 
+    <!--图片放大器-->
+    <style name="picLook" parent="@android:style/Animation">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowEnterAnimation">@anim/scale_in</item>
+        <item name="android:windowExitAnimation">@anim/scale_out</item>
+    </style>
+
     <!--右边滑出的activity-->
     <style name="MyDialogStyleBottom" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowAnimationStyle">@style/AnimBottom</item>
@@ -83,13 +91,7 @@
     </style>
 
 
-    <declare-styleable name="RatioImageView">
-        <attr name="ratio" format="float" />
-    </declare-styleable>
 
-    <declare-styleable name="NineGridLayout">
-        <attr name="sapcing" format="dimension" />
-    </declare-styleable>
 
     <!--拍照用的-->
     <style name="MyDialogTheme" parent="@android:style/Theme.Holo.Light">
@@ -111,7 +113,6 @@
     </style>
 
 
-
     <!--  这个是加入的代码 -->
     <style name="mypopwindow_anim_style">
         <item name="android:windowEnterAnimation">@anim/popshow_anim</item>
@@ -124,6 +125,23 @@
     <style name="popWindow_animation">
         <item name="android:windowEnterAnimation">@anim/popupwindow_enter</item>
         <item name="android:windowExitAnimation">@anim/popupwindow_exit</item>
+    </style>
+
+
+    <style name="MyDialogStyle">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="BottomDialog" parent="@style/Base.V7.Theme.AppCompat.Light.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/white</item>
     </style>
 
 </resources>

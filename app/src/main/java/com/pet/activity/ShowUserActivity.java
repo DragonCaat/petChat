@@ -98,6 +98,8 @@ public class ShowUserActivity extends AppCompatActivity {
 
     private Context mContext;
 
+    private int follow_status = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,8 +119,8 @@ public class ShowUserActivity extends AppCompatActivity {
     }
 
     private void initFragmentTab() {
-        mAttentionFragment = new AttentionFragment();
-        mCutePetFragment = new CutePetFragment();
+        mAttentionFragment = new AttentionFragment(othet_user_id);
+        mCutePetFragment = new CutePetFragment(othet_user_id);
 
         mFragmentTab = new ArrayList<>();
 
@@ -136,7 +138,7 @@ public class ShowUserActivity extends AppCompatActivity {
         MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(getSupportFragmentManager(), tableTitle, mFragmentTab, 2);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
-        tabLayout.setTabTextColors(Color.BLACK, Color.parseColor("#d3d3d3"));
+        tabLayout.setTabTextColors(Color.parseColor("#d3d3d3"), Color.BLACK);
         tabLayout.setSelectedTabIndicatorColor(Color.TRANSPARENT);
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
     }
@@ -151,17 +153,63 @@ public class ShowUserActivity extends AppCompatActivity {
         collapsingToolbarLayout.setTitle("");
     }
 
-    @OnClick({R.id.iv_back})
+    @OnClick({R.id.iv_back, R.id.tv_follow_status})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_back:
                 finish();
                 break;
 
+            //关注按钮
+            case R.id.tv_follow_status:
+                userFollow();
+                break;
+
             default:
                 break;
         }
     }
+
+    //用户关注和取消关注
+    private void userFollow() {
+        ApiService api = RetrofitClient.getInstance(this).Api();
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_id", user_id);
+        params.put("access_token", acces_token);
+        params.put("mobilephone", phone);
+        params.put("app_Key", "yunmiao");
+
+        params.put("follow_id", othet_user_id);
+        Call<ResultEntity> call = api.userFollow(params);
+        call.enqueue(new retrofit2.Callback<ResultEntity>() {
+            @Override
+            public void onResponse(Call<ResultEntity> call,
+                                   Response<ResultEntity> response) {
+                if (response.body() == null) {
+                    return;
+                }
+                ResultEntity result = response.body();
+                int res = result.getCode();
+                if (res == 200) {// 获取成功
+                    if ("取消关注成功".equals(result.getMessage())) {
+                        mTvFollowStatus.setText("+ 关注");
+                        //follow_status = 0;
+                    } else {
+                        mTvFollowStatus.setText("已关注");
+                        //follow_status = 1;
+                    }
+                    Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(mContext, "" + result.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResultEntity> call, Throwable t) {
+
+            }
+        });
+    }
+
 
     //获取个人数据信息
     private void getData() {
@@ -217,8 +265,8 @@ public class ShowUserActivity extends AppCompatActivity {
                 mIvGender.setImageResource(R.mipmap.boy);
             else
                 mIvGender.setImageResource(R.mipmap.girl);
-
-            if (otherInfoEntity.getFollow_status() == 0)
+            follow_status = otherInfoEntity.getFollow_status();
+            if (follow_status == 1)
                 mTvFollowStatus.setText("已关注");
             else
                 mTvFollowStatus.setText("+ 关注");

@@ -15,6 +15,8 @@ public interface ClusterItem {
     LatLng getPosition();
     String getUserType();
 
+    String getUserId();
+
     String getUrl();
 
 

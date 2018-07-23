@@ -1,8 +1,12 @@
 package com.pet.fragment;
 
+import android.app.ActivityOptions;
+import android.app.SharedElementCallback;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,12 +16,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.pet.R;
+import com.pet.activity.ImagePreviewActivity;
 import com.pet.adapter.DynamicAdapter;
 import com.pet.adapter.HotTakePhotoAdapter;
 import com.pet.baseadapter.BaseAdapter;
@@ -27,6 +34,9 @@ import com.pet.baseadapter.OnLoad;
 import com.pet.bean.Const;
 import com.pet.bean.DynamicEntity;
 import com.pet.bean.ResultEntity;
+import com.pet.ninelayout.OnItemPictureClickListener;
+import com.pet.ninelayout.P;
+import com.pet.ninelayout.Utils;
 import com.pet.retrofit.ApiService;
 import com.pet.retrofit.RetrofitClient;
 import com.pet.utils.PreferencesUtils;
@@ -60,11 +70,13 @@ public class HotTakePhotoFragment extends Fragment {
 
 
     private HotTakePhotoAdapter adapter;
-    int loadCount = 0;
+    private int loadCount = 0;
     private BaseAdapter mAdapter;
 
     private List<DynamicEntity> dataSet;
 
+    private int itemPosition;
+    private Bundle mReenterState;
 
     @Nullable
     @Override
@@ -74,9 +86,9 @@ public class HotTakePhotoFragment extends Fragment {
         ButterKnife.bind(this, view);
         circle_id = getArguments().getInt("id");
         user_id = PreferencesUtils.getInt(getActivity(), Const.USER_ID, 0);
-
         acces_token = PreferencesUtils.getString(getActivity(), Const.ACCESS_TOKEN);
         phone = PreferencesUtils.getString(getActivity(), Const.MOBILE_PHONE);
+
         initData();
 
         return view;
@@ -84,18 +96,77 @@ public class HotTakePhotoFragment extends Fragment {
 
     private void initData() {
         //创建被装饰者类实例
-        adapter = new HotTakePhotoAdapter(getContext());
+        adapter = new HotTakePhotoAdapter(getActivity(), new OnItemPictureClickListener() {
+            @Override
+            public void onItemPictureClick(int item, int position, String url, List<String> urlList, ImageView imageView) {
+                itemPosition = item;
+                Intent intent = new Intent(mContext, ImagePreviewActivity.class);
+                intent.putStringArrayListExtra("imageList", (ArrayList<String>) urlList);
+                intent.putExtra(P.START_ITEM_POSITION, itemPosition);
+                intent.putExtra(P.START_IAMGE_POSITION, position);
+                intent.putExtra("flag",1);
+                ActivityOptions compat = ActivityOptions.makeSceneTransitionAnimation(getActivity(), imageView, imageView.getTransitionName());
+                startActivity(intent, compat.toBundle());
+            }
+        });
 
         mAdapter = new LoadMoreAdapterWrapper(adapter, new OnLoad() {
             @Override
             public void load(int pagePosition, int pageSize, final ILoadCallback callback) {
                 getData(callback);
+
             }
         });
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
 
     }
+
+    public void initShareElement() {
+        getActivity().setExitSharedElementCallback(mCallback);
+    }
+    //调用activity返回数据的时候调用
+    public void getActivityData(Intent data) {
+        mReenterState = new Bundle(data.getExtras());
+        int startingPosition = mReenterState.getInt(P.CURRENT_ITEM_POSITION);
+        if (startingPosition != itemPosition) {//如果不是同一个item就滚动到指定的item
+            recyclerView.scrollToPosition(itemPosition);
+        }
+        postponeEnterTransition();
+        recyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                recyclerView.requestLayout();
+                startPostponedEnterTransition();
+                return true;
+            }
+        });
+
+    }
+
+    private final SharedElementCallback mCallback = new SharedElementCallback() {
+
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+            if (mReenterState != null) {
+                //从别的界面返回当前界面
+                int startingPosition = mReenterState.getInt(P.START_IAMGE_POSITION);
+                int currentPosition = mReenterState.getInt(P.CURRENT_IAMGE_POSITION);
+                if (startingPosition != currentPosition) {//如果不是之前的那张图片就切换到指定的图片
+                    String newTransitionName = Utils.getNameByPosition(itemPosition, currentPosition);
+                    View newSharedElement = recyclerView.findViewWithTag(newTransitionName);
+                    if (newSharedElement != null) {
+                        names.clear();
+                        names.add(newTransitionName);
+                        sharedElements.clear();
+                        sharedElements.put(newTransitionName, newSharedElement);
+                    }
+                }
+                mReenterState = null;
+            }
+        }
+    };
 
 
     //获取关注的动态
@@ -114,7 +185,6 @@ public class HotTakePhotoFragment extends Fragment {
             @Override
             public void onResponse(Call<ResultEntity> call,
                                    Response<ResultEntity> response) {
-
                 if (response.body() == null) {
                     return;
                 }
@@ -133,8 +203,10 @@ public class HotTakePhotoFragment extends Fragment {
                             callback.onSuccess();
                             adapter.notifyDataSetChanged();
                         } else {
+                            //请求不到数据的时候
                             callback.onFailure();
                             adapter.notifyDataSetChanged();
+
                         }
                     }
                 } else
@@ -148,4 +220,9 @@ public class HotTakePhotoFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        loadCount = 0;
+    }
 }
